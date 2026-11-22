@@ -1,679 +1,3065 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-MZ">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Gestão Financeira em Tempo Real</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Bibliotecas PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mente Segura — Apoio à Saúde Mental em Moçambique</title>
+  <style>
+    :root {
+      --teal: #007791;
+      --teal-dark: #005b70;
+      --teal-soft: #eaf5f8;
+      --amber: #f5b841;
+      --amber-hover: #e5a72e;
+      --red: #d94141;
+      --red-dark: #b32d2d;
+      --red-soft: #fdeeee;
+      --green: #1e8e5a;
+      --green-soft: #e7f6ef;
+      --whatsapp: #25D366;
+      --whatsapp-dark: #1ebe5d;
+      --text-dark: #16323c;
+      --text-muted: #526a73;
+      --bg-outer: #d9e4e8;
+      --white: #ffffff;
+      --border: #d5e2e6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg-outer);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .phone-frame {
+      width: 100%;
+      max-width: 410px;
+      min-height: 760px;
+      max-height: 92vh;
+      background: var(--white);
+      border-radius: 36px;
+      border: 8px solid #1e292d;
+      box-shadow: 0 24px 60px rgba(15, 38, 46, 0.22);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* --- ECRÃ 1: INICIAL --- */
+    .home-screen {
+      background: var(--teal-soft);
+      padding: 22px 24px 18px;
+      justify-content: space-between;
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    .top-bar-home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .country-badge {
+      color: var(--teal);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+      user-select: none;
+    }
+
+    .logo-wrap {
+      margin: 10px auto 8px;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .home-title {
+      font-size: 1.85rem;
+      line-height: 1.15;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .home-subtitle {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #264854;
+      margin-bottom: 6px;
+    }
+
+    .home-desc {
+      font-size: 0.9rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+      max-width: 280px;
+      margin: 0 auto 18px;
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-amber {
+      background: var(--amber);
+      color: var(--text-dark);
+      box-shadow: 0 8px 20px rgba(245, 184, 65, 0.35);
+    }
+
+    .btn-amber:hover {
+      background: var(--amber-hover);
+    }
+
+    .btn-teal {
+      background: var(--teal);
+      color: var(--white);
+      box-shadow: 0 8px 20px rgba(0, 119, 145, 0.25);
+    }
+
+    .btn-teal:hover {
+      background: var(--teal-dark);
+    }
+
+    .btn-outline-teal {
+      background: var(--white);
+      color: var(--teal-dark);
+      border: 1.5px solid rgba(0, 119, 145, 0.35);
+      margin-top: 9px;
+      font-size: 0.92rem;
+      padding: 12px 18px;
+    }
+
+    .btn-outline-teal:hover {
+      background: #f0f9fb;
+    }
+
+    .btn-whatsapp {
+      background: var(--whatsapp);
+      color: var(--white);
+      box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+      margin-top: 9px;
+      font-size: 0.94rem;
+      padding: 13px 18px;
+    }
+
+    .btn-whatsapp:hover {
+      background: var(--whatsapp-dark);
+    }
+
+    .btn-red {
+      background: var(--red);
+      color: var(--white);
+      box-shadow: 0 8px 20px rgba(217, 65, 65, 0.28);
+    }
+
+    .btn-red:hover {
+      background: var(--red-dark);
+    }
+
+    .btn-outline-red {
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid rgba(217, 65, 65, 0.35);
+      margin-top: 9px;
+      font-size: 0.88rem;
+      padding: 11px 18px;
+    }
+
+    .btn-outline-red:hover {
+      background: rgba(217, 65, 65, 0.06);
+    }
+
+    .trust-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--teal);
+      padding-top: 12px;
+    }
+
+    .admin-trigger {
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 999px;
+      transition: background 0.2s;
+    }
+
+    .admin-trigger:hover {
+      background: rgba(0, 119, 145, 0.12);
+    }
+
+    /* Botão Flutuante WhatsApp */
+    .floating-wa-btn {
+      position: absolute;
+      bottom: 52px;
+      right: 18px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--whatsapp);
+      color: var(--white);
+      border: none;
+      box-shadow: 0 8px 22px rgba(37, 211, 102, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 15;
+      transition: transform 0.15s ease;
+    }
+
+    .floating-wa-btn:hover {
+      transform: scale(1.07);
+      background: var(--whatsapp-dark);
+    }
+
+    .floating-wa-btn.visible {
+      display: flex;
+    }
+
+    /* --- CABEÇALHOS INTERNOS --- */
+    .test-header {
+      background: var(--teal);
+      color: var(--white);
+      padding: 18px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.16);
+      border: none;
+      color: var(--white);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .test-header h2 {
+      font-size: 1.12rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    /* --- ECRÃ QUEM SOMOS --- */
+    .about-body {
+      flex: 1;
+      background: #f3f7f9;
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .about-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(15, 38, 46, 0.04);
+    }
+
+    .about-card h3 {
+      font-size: 1.08rem;
+      color: var(--teal-dark);
+      margin-bottom: 8px;
+    }
+
+    .about-card p {
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: var(--text-dark);
+      white-space: pre-line;
+    }
+
+    .contact-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: var(--teal-soft);
+      border: 1px solid #cbe4eb;
+      margin-top: 10px;
+      text-decoration: none;
+      color: var(--text-dark);
+      transition: background 0.15s;
+    }
+
+    .contact-detail-row:hover {
+      background: #dceff4;
+    }
+
+    .contact-icon-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--teal);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .contact-detail-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .contact-detail-val {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: var(--teal-dark);
+      word-break: break-all;
+    }
+
+    /* --- ECRÃ DE VÍDEOS PARA VISITANTES --- */
+    .videos-body {
+      flex: 1;
+      background: #f3f7f9;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .video-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(15, 38, 46, 0.05);
+    }
+
+    .video-media-wrap {
+      width: 100%;
+      background: #0d1b20;
+      position: relative;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .video-media-wrap video,
+    .video-media-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #000;
+    }
+
+    .video-info {
+      padding: 14px;
+    }
+
+    .video-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 5px;
+    }
+
+    .video-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .video-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .video-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .btn-download-video {
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      border: 1.5px solid #bfe0e8;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    .btn-download-video:hover {
+      background: #d5edf3;
+    }
+
+    /* --- ECRÃ 2: QUESTIONÁRIO --- */
+    .progress-area {
+      padding: 14px 20px 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white);
+      flex-shrink: 0;
+    }
+
+    .step-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 8px;
+      background: #e3ecef;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--amber);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .questions-body {
+      flex: 1;
+      padding: 12px 20px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .question-block {
+      border-bottom: 1px solid #edf3f5;
+      padding-bottom: 18px;
+    }
+
+    .question-block:last-child {
+      border-bottom: none;
+    }
+
+    .question-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+      line-height: 1.35;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.94rem;
+      color: var(--text-dark);
+    }
+
+    .option-item:hover {
+      border-color: var(--teal);
+      background: #f5fbfc;
+    }
+
+    .option-item.selected {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      font-weight: 600;
+    }
+
+    .radio-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #9ab2ba;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-item.selected .radio-circle {
+      border-color: var(--teal);
+    }
+
+    .option-item.selected .radio-circle::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    .test-footer {
+      padding: 14px 20px 22px;
+      background: var(--white);
+      border-top: 1px solid #edf3f5;
+      flex-shrink: 0;
+    }
+
+    .error-msg {
+      color: var(--red);
+      font-size: 0.84rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 8px;
+      display: none;
+    }
+
+    /* --- ECRÃ 3: RESULTADO & FORMULÁRIO DE CONTACTO --- */
+    .result-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .result-card {
+      border-radius: 18px;
+      padding: 18px;
+      border-left: 6px solid var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .result-card.moderate {
+      border-left-color: var(--amber);
+      background: #fef8ea;
+    }
+
+    .result-card.high {
+      border-left-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .result-badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .result-card.moderate .result-badge {
+      background: var(--amber);
+      color: var(--text-dark);
+    }
+
+    .result-card.high .result-badge {
+      background: var(--red);
+      color: var(--white);
+    }
+
+    .result-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+      color: var(--text-dark);
+    }
+
+    .result-card p {
+      font-size: 0.92rem;
+      line-height: 1.5;
+      color: #2e4852;
+    }
+
+    .contact-followup-box {
+      background: var(--white);
+      border: 1.8px solid #b8dce4;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 6px 18px rgba(0, 119, 145, 0.06);
+    }
+
+    .contact-followup-box h4 {
+      font-size: 0.98rem;
+      color: var(--teal-dark);
+      margin-bottom: 4px;
+    }
+
+    .contact-followup-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .contact-form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contact-field label {
+      display: block;
+      font-size: 0.79rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .contact-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      color: var(--text-dark);
+      background: #f9fcfd;
+    }
+
+    .contact-input:focus {
+      border-color: var(--teal);
+      background: var(--white);
+    }
+
+    .contact-feedback {
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .contact-feedback.success {
+      display: block;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .contact-feedback.error {
+      display: block;
+      background: var(--red-soft);
+      color: var(--red-dark);
+    }
+
+    .tips-box {
+      background: #f8fbfc;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .tips-box h4 {
+      font-size: 0.96rem;
+      color: var(--teal-dark);
+      margin-bottom: 10px;
+    }
+
+    .tips-box ul {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      line-height: 1.45;
+    }
+
+    .breathing-widget {
+      background: var(--teal);
+      color: var(--white);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .breath-circle {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.22);
+      margin: 10px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: transform 4s ease-in-out;
+    }
+
+    .breath-circle.expand {
+      transform: scale(1.28);
+      background: rgba(245, 184, 65, 0.45);
+    }
+
+    .mini-btn {
+      background: var(--white);
+      color: var(--teal-dark);
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    /* --- ECRÃ 4: EMERGÊNCIA --- */
+    .emergency-header {
+      background: var(--red);
+      color: var(--white);
+      padding: 20px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .emergency-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    .emergency-body {
+      flex: 1;
+      background: var(--red-soft);
+      padding: 24px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    .emergency-title {
+      font-size: 1.85rem;
+      line-height: 1.15;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 10px;
+    }
+
+    .emergency-sub {
+      font-size: 0.98rem;
+      color: #4a3535;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    .phone-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--red);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      box-shadow: 0 12px 26px rgba(217, 65, 65, 0.35);
+      cursor: pointer;
+    }
+
+    .helpline-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-top: 16px;
+    }
+
+    .helpline-number {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--red);
+      letter-spacing: 0.5px;
+      margin: 4px 0 14px;
+    }
+
+    .emergency-112-box {
+      width: 100%;
+      background: var(--white);
+      border: 1.5px solid #f0baba;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--red-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .emergency-footer {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding-top: 14px;
+    }
+
+    /* --- ECRÃ 5: LOGIN ADMINISTRADORA --- */
+    .admin-login-body {
+      flex: 1;
+      background: var(--teal-soft);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-card {
+      width: 100%;
+      background: var(--white);
+      border-radius: 22px;
+      padding: 24px 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 26px rgba(0, 119, 145, 0.08);
+      text-align: center;
+    }
+
+    .field-group {
+      text-align: left;
+      margin-top: 14px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 13px 14px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      border: 1.8px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      color: var(--text-dark);
+      background: #f9fcfd;
+    }
+
+    .login-input:focus {
+      border-color: var(--teal);
+      background: var(--white);
+    }
+
+    /* --- ECRÃ 6: PAINEL DO ADMINISTRADOR --- */
+    .admin-tabs {
+      display: flex;
+      background: var(--white);
+      border-bottom: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .admin-tab-btn {
+      flex: 1;
+      padding: 12px 6px;
+      border: none;
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .admin-tab-btn.active {
+      color: var(--teal);
+      border-bottom-color: var(--teal);
+      background: #f6fbfc;
+    }
+
+    .admin-body {
+      flex: 1;
+      background: #f3f7f9;
+      padding: 14px 16px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sync-banner {
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .sync-banner.local {
+      background: #fef3d6;
+      color: #8a5a00;
+    }
+
+    .admin-card-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .admin-card-box h4 {
+      font-size: 0.94rem;
+      color: var(--teal-dark);
+    }
+
+    .hint-box {
+      background: #f4fafc;
+      border: 1px solid #cde4eb;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.78rem;
+      color: #264854;
+      line-height: 1.45;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .stat-card.urgent {
+      border-left: 4px solid var(--red);
+      background: #fff9f9;
+    }
+
+    .stat-card.mod {
+      border-left: 4px solid var(--amber);
+    }
+
+    .stat-card.ok {
+      border-left: 4px solid var(--green);
+    }
+
+    .stat-num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .admin-toolbar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .filter-chip {
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text-dark);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .filter-chip.active {
+      background: var(--teal);
+      color: var(--white);
+      border-color: var(--teal);
+    }
+
+    .admin-actions-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-small-btn {
+      flex: 1;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--teal-dark);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .action-small-btn:hover {
+      background: var(--teal-soft);
+    }
+
+    .consult-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .consult-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .consult-card:hover {
+      border-color: var(--teal);
+    }
+
+    .consult-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .consult-id {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--text-dark);
+    }
+
+    .risk-pill {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .risk-high {
+      background: var(--red-soft);
+      color: var(--red-dark);
+    }
+
+    .risk-moderate {
+      background: #fef3d6;
+      color: #8a5a00;
+    }
+
+    .risk-low {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .consult-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .status-tag {
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .status-pending {
+      color: #b56c00;
+    }
+
+    .status-done {
+      color: var(--green);
+    }
+
+    .detail-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .visitor-contact-card {
+      background: var(--teal-soft);
+      border: 1px solid #bfe0e8;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 0.83rem;
+      line-height: 1.5;
+      color: var(--text-dark);
+    }
+
+    .qa-item {
+      background: #f8fbfc;
+      border-radius: 10px;
+      padding: 10px;
+      border-left: 3px solid var(--teal);
+    }
+
+    .qa-q {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .qa-a {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .admin-notes {
+      width: 100%;
+      min-height: 74px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 0.88rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    .admin-notes:focus {
+      border-color: var(--teal);
+    }
+
+    .admin-video-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: #f8fbfc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .btn-delete-small {
+      background: var(--red-soft);
+      color: var(--red-dark);
+      border: 1px solid #f0baba;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px dashed var(--border);
+    }
+
+    /* Modal de Simulação de Chamada */
+    .call-modal {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(18, 30, 35, 0.92);
+      color: var(--white);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      text-align: center;
+      z-index: 20;
+    }
+
+    .call-modal.active {
+      display: flex;
+    }
+
+    .pulse-ring {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(217, 65, 65, 0.7); }
+      70% { box-shadow: 0 0 0 22px rgba(217, 65, 65, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(217, 65, 65, 0); }
+    }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+<body>
 
-  <!-- ================= BARRA DE ESTADO ================= -->
-  <div class="max-w-6xl mx-auto mb-4 flex justify-between items-center bg-slate-800/80 border border-slate-700/80 px-4 py-2.5 rounded-xl shadow-sm">
-    <div class="flex items-center gap-2">
-      <span id="statusConexao" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span class="text-xs text-slate-300 font-medium">Sincronização em Tempo Real:</span>
-      <span id="rotuloPerfil" class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
-        Visitante (Consulta)
-      </span>
-    </div>
-    <div>
-      <button id="btnAbrirLogin" onclick="abrirModalLogin()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow">
-        🔐 Entrar como Admin
-      </button>
-      <button id="btnSairAdmin" onclick="fazerLogout()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition hidden">
-        🚪 Sair do Modo Admin
-      </button>
-    </div>
-  </div>
+  <main class="phone-frame">
 
-  <!-- ================= MODAL DE LOGIN (ADMIN) ================= -->
-  <div id="telaLogin" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full space-y-5">
-      <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold text-white tracking-tight">Login do Administrador</h2>
-        <button onclick="fecharModalLogin()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+    <!-- ================= ECRÃ 1: INICIAL ================= -->
+    <section id="screen-home" class="screen home-screen active">
+      <div class="top-bar-home">
+        <div class="country-badge" ondblclick="openAdminGate()">Moçambique</div>
       </div>
-      <p class="text-slate-400 text-xs">Apenas o administrador autenticado pode alterar valores e lançamentos.</p>
 
-      <form onsubmit="fazerLogin(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Utilizador</label>
-          <input type="text" id="loginUser" placeholder="Digite o utilizador" required
-            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition">
-        </div>
-
-        <div>
-          <label class="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Palavra-passe</label>
-          <div class="relative">
-            <input type="password" id="loginPass" placeholder="Digite a palavra-passe" required
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition pr-10">
-            <button type="button" onclick="alternarSenha()" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-sm">👁️</button>
-          </div>
-        </div>
-
-        <p id="erroLogin" class="text-rose-400 text-xs font-medium text-center hidden bg-rose-500/10 border border-rose-500/20 py-2 rounded-lg">
-          Credenciais incorretas!
-        </p>
-
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition shadow">
-          Aceder ao Painel
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ================= PAINEL PRINCIPAL ================= -->
-  <div class="max-w-6xl mx-auto space-y-6">
-
-    <!-- Cabeçalho -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
       <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-2xl font-bold text-white tracking-tight">Painel de Caixa & Evidências</h1>
-          <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full text-xs font-semibold">
-            Em Tempo Real
-          </span>
+        <div class="logo-wrap" aria-hidden="true">
+          <svg width="88" height="80" viewBox="0 0 104 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M52 88C52 88 10 61.5 10 31.5C10 18.5 20.2 8 33 8C41.2 8 48.4 12.3 52 18.8V88Z" fill="#007791"/>
+            <path d="M52 88C52 88 94 61.5 94 31.5C94 18.5 83.8 8 71 8C62.8 8 55.6 12.3 52 18.8V88Z" fill="#F5B841"/>
+          </svg>
         </div>
-        <p class="text-slate-400 text-sm mt-1">Dados sincronizados instantaneamente em todos os ecrãs conectados</p>
-      </div>
-      <div class="mt-4 md:mt-0 flex flex-wrap gap-2.5">
-        <button onclick="exportarPDF()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1.5">
-          <span>📄</span> Baixar PDF
+
+        <h1 class="home-title">Bem-vindo ao<br>Mente Segura</h1>
+        <p class="home-subtitle">Apoio à saúde mental em Moçambique.</p>
+        <p class="home-desc">Um espaço seguro para cuidar da sua mente, a qualquer momento.</p>
+
+        <button class="btn btn-amber" onclick="startTest()">Fazer Teste</button>
+        <button class="btn btn-outline-teal" onclick="openVideosScreen()">🎬 Vídeos de Apoio e Bem-Estar</button>
+        <button class="btn btn-outline-teal" onclick="openAboutScreen()">ℹ️ Quem Somos</button>
+        <button id="home-wa-btn" class="btn btn-whatsapp" style="display:none;" onclick="openWhatsAppChat()">
+          💬 Falar no WhatsApp
         </button>
-        <button onclick="exportarCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1.5">
-          <span>📊</span> Exportar CSV
+        <button class="btn btn-outline-red" onclick="goToScreen('screen-emergency')">Preciso de Ajuda Agora (Emergência)</button>
+      </div>
+
+      <div class="trust-footer">
+        <span>🛡️ Privado</span>
+        <span>•</span>
+        <span>Confidencial</span>
+        <span>•</span>
+        <span class="admin-trigger" onclick="openAdminGate()" title="Acesso Administrativo">🔒 Admin</span>
+      </div>
+
+      <!-- Botão Flutuante WhatsApp -->
+      <button id="floating-wa-btn" class="floating-wa-btn" onclick="openWhatsAppChat()" title="Conversar no WhatsApp" aria-label="Conversar no WhatsApp">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.758.458 3.474 1.328 4.988L2 22l5.188-1.36a9.927 9.927 0 004.843 1.258h.004c5.515 0 9.968-4.453 9.968-9.969 0-2.663-1.037-5.167-2.92-7.05A9.903 9.903 0 0012.031 2zm5.821 14.236c-.246.692-1.43 1.324-1.988 1.408-.508.076-1.15.108-1.856-.116-.428-.136-.977-.318-1.681-.622-2.958-1.277-4.89-4.254-5.038-4.451-.148-.197-1.203-1.6-1.203-3.052 0-1.452.761-2.166 1.031-2.462.271-.296.591-.37.788-.37.197 0 .394.002.566.01.182.009.425-.069.665.507.246.591.837 2.043.911 2.191.074.148.123.32.025.517-.099.197-.148.32-.296.493-.148.172-.311.385-.444.517-.148.148-.302.308-.13.604.172.296.766 1.263 1.645 2.046 1.13 1.007 2.083 1.319 2.379 1.467.296.148.468.123.64-.074.172-.197.739-.862.936-1.158.197-.296.394-.246.665-.148.271.099 1.724.813 2.019.961.296.148.493.222.566.345.074.123.074.714-.172 1.406z"/>
+        </svg>
+      </button>
+    </section>
+
+    <!-- ================= ECRÃ QUEM SOMOS ================= -->
+    <section id="screen-about" class="screen">
+      <header class="test-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="goToScreen('screen-home')" aria-label="Voltar">&#8592;</button>
+          <h2>Quem Somos<br>Mente Segura</h2>
+        </div>
+      </header>
+
+      <div class="about-body">
+        <div class="about-card">
+          <h3>Sobre o Mente Segura</h3>
+          <p id="about-description-text"></p>
+        </div>
+
+        <div class="about-card">
+          <h3>📞 Contactos Oficiais</h3>
+          <p style="font-size:0.84rem; color:var(--text-muted); margin-bottom:6px;">
+            Entre em contacto connosco por telefone ou e-mail para informações e acompanhamento:
+          </p>
+          <div id="about-contacts-container"></div>
+        </div>
+
+        <button class="btn btn-amber" onclick="startTest()">Fazer Teste de Bem-Estar</button>
+      </div>
+    </section>
+
+    <!-- ================= ECRÃ VÍDEOS (VISITANTES) ================= -->
+    <section id="screen-videos" class="screen">
+      <header class="test-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="goToScreen('screen-home')" aria-label="Voltar">&#8592;</button>
+          <h2>Vídeos de Apoio<br>Assistir e Baixar</h2>
+        </div>
+      </header>
+
+      <div id="visitor-videos-list" class="videos-body"></div>
+    </section>
+
+    <!-- ================= ECRÃ 2: TESTE DE BEM-ESTAR ================= -->
+    <section id="screen-test" class="screen">
+      <header class="test-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="prevStep()" aria-label="Voltar">&#8592;</button>
+          <h2>Teste de Bem-Estar<br>Psicológico</h2>
+        </div>
+      </header>
+
+      <div class="progress-area">
+        <span id="step-label" class="step-text">1 de 3</span>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill" style="width: 33.3%;"></div>
+        </div>
+      </div>
+
+      <div id="questions-container" class="questions-body"></div>
+
+      <div class="test-footer">
+        <div id="validation-error" class="error-msg">Por favor, responda a todas as perguntas antes de continuar.</div>
+        <button id="next-btn" class="btn btn-teal" onclick="nextStep()">Continuar</button>
+      </div>
+    </section>
+
+    <!-- ================= ECRÃ 3: RESPOSTAS AUTOMÁTICAS + DADOS DO VISITANTE ================= -->
+    <section id="screen-result" class="screen">
+      <header class="test-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="goToScreen('screen-home')" aria-label="Início">&#8962;</button>
+          <h2>Resultado e Apoio<br>Personalizado</h2>
+        </div>
+      </header>
+
+      <div class="result-body">
+        <div id="result-card" class="result-card">
+          <span id="result-badge" class="result-badge">Equilíbrio Estável</span>
+          <h3 id="result-title">O seu bem-estar está num bom caminho</h3>
+          <p id="result-message"></p>
+        </div>
+
+        <!-- FORMULÁRIO DE CONTACTO DO VISITANTE APÓS A CONSULTA -->
+        <div class="contact-followup-box">
+          <h4>📋 Deixe os seus dados para acompanhamento</h4>
+          <p class="contact-followup-sub">
+            Se desejar que a nossa equipa entre em contacto consigo, preencha os campos abaixo (confidencial):
+          </p>
+
+          <div class="contact-form-grid">
+            <div class="contact-field">
+              <label for="visitor-phone">Número de Telefone</label>
+              <input type="tel" id="visitor-phone" class="contact-input" placeholder="Ex: 84 123 4567" />
+            </div>
+
+            <div class="contact-field">
+              <label for="visitor-address">Morada (Rua / Avenida / Casa)</label>
+              <input type="text" id="visitor-address" class="contact-input" placeholder="Ex: Av. Eduardo Mondlane, nº 120" />
+            </div>
+
+            <div class="contact-field">
+              <label for="visitor-neighborhood">Bairro</label>
+              <input type="text" id="visitor-neighborhood" class="contact-input" placeholder="Ex: Polana Cimento / Alto Maé" />
+            </div>
+
+            <div class="contact-field">
+              <label for="visitor-email">E-mail</label>
+              <input type="email" id="visitor-email" class="contact-input" placeholder="Ex: seuemail@exemplo.com" />
+            </div>
+
+            <button id="save-contact-btn" class="btn btn-teal" style="padding:12px 18px; font-size:0.94rem; margin-top:4px;" onclick="saveVisitorContact()">
+              Enviar Dados de Contacto
+            </button>
+          </div>
+
+          <div id="contact-feedback" class="contact-feedback"></div>
+        </div>
+
+        <div class="tips-box">
+          <h4>Recomendações automáticas para si:</h4>
+          <ul id="result-tips"></ul>
+        </div>
+
+        <div class="breathing-widget">
+          <div style="font-weight:700; font-size:0.95rem;">Pausa Guiada de Respiração (4-4-4)</div>
+          <div id="breath-circle" class="breath-circle">Pronto</div>
+          <div id="breath-instruction" style="font-size:0.84rem; opacity:0.92;">Clique abaixo para acalmar a mente em 1 minuto</div>
+          <button class="mini-btn" id="breath-btn" onclick="toggleBreathing()">Iniciar Exercício</button>
+        </div>
+
+        <button id="result-wa-btn" class="btn btn-whatsapp" style="display:none; margin-top:0;" onclick="openWhatsAppChat()">
+          💬 Conversar pelo WhatsApp
         </button>
-        <button id="btnLimparDados" onclick="confirmarLimpeza()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 px-3.5 py-2 rounded-lg text-sm font-medium transition hidden flex items-center gap-1.5">
-          <span>🗑️</span> Limpar Lançamentos
-        </button>
+        <button id="result-help-btn" class="btn btn-red" onclick="requestPsychologistHelp()">Falar com Psicóloga Agora</button>
+        <button class="btn btn-amber" onclick="startTest()">Refazer Teste</button>
       </div>
+    </section>
+
+    <!-- ================= ECRÃ 4: EMERGÊNCIA ================= -->
+    <section id="screen-emergency" class="screen">
+      <header class="emergency-header">
+        <div class="emergency-header-left">
+          <span>🛡️</span>
+          <span>Emergência</span>
+        </div>
+        <button class="back-btn" onclick="goToScreen('screen-home')" aria-label="Fechar">✕</button>
+      </header>
+
+      <div class="emergency-body">
+        <div style="width:100%;">
+          <h2 class="emergency-title">Falar com<br>Psicóloga</h2>
+          <p class="emergency-sub">Precisa de ajuda agora?<br>Estamos aqui para si, 24 horas.</p>
+
+          <div class="phone-circle" onclick="simulateCall('800 123 456', 'Linha de Apoio Mente Segura')">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"/>
+            </svg>
+          </div>
+
+          <button class="btn btn-red" onclick="simulateCall('800 123 456', 'Linha de Apoio Mente Segura')">Ligar agora</button>
+          <button id="emergency-wa-btn" class="btn btn-whatsapp" style="display:none;" onclick="openWhatsAppChat()">
+            💬 Enviar Mensagem no WhatsApp
+          </button>
+
+          <div class="helpline-label">Linha de apoio:</div>
+          <div class="helpline-number">800 123 456</div>
+
+          <div class="emergency-112-box" onclick="simulateCall('112', 'Emergência Nacional Moçambique')">
+            <span>Se for emergência grave, ligue 112</span>
+            <span>ⓘ</span>
+          </div>
+        </div>
+
+        <div class="emergency-footer">
+          Atendimento gratuito e confidencial
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ECRÃ 5: LOGIN ADMINISTRADORA ================= -->
+    <section id="screen-admin-login" class="screen">
+      <header class="test-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="goToScreen('screen-home')" aria-label="Voltar">&#8592;</button>
+          <h2>Área Restrita<br>Administradora</h2>
+        </div>
+      </header>
+
+      <div class="admin-login-body">
+        <div class="login-card">
+          <div style="font-size:2.3rem; margin-bottom:8px;">🔐</div>
+          <h3 style="font-size:1.2rem; color:var(--text-dark);">Acesso Clínico & Gestão</h3>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">
+            Entre com as suas credenciais para gerir consultas, vídeos, WhatsApp e Quem Somos.
+          </p>
+
+          <div class="field-group">
+            <label class="field-label" for="admin-user-input">Utilizador (Username)</label>
+            <input type="text" id="admin-user-input" class="login-input" placeholder="Digite o utilizador" autocomplete="username" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="admin-pass-input">Senha</label>
+            <input type="password" id="admin-pass-input" class="login-input" placeholder="••••••" autocomplete="current-password" onkeyup="if(event.key==='Enter') verifyAdminLogin()" />
+          </div>
+
+          <div id="login-error" class="error-msg" style="margin-top:12px;">Utilizador ou senha incorretos.</div>
+
+          <button class="btn btn-teal" style="margin-top:16px;" onclick="verifyAdminLogin()">Entrar no Painel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ECRÃ 6: PAINEL DA ADMINISTRADORA ================= -->
+    <section id="screen-admin" class="screen">
+      <header class="test-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="goToScreen('screen-home')" aria-label="Sair">&#8962;</button>
+          <h2>Painel Admin<br>Mente Segura</h2>
+        </div>
+        <button class="back-btn" onclick="logoutAdmin()" title="Terminar Sessão">🔒</button>
+      </header>
+
+      <!-- Separadores do Painel Admin -->
+      <div class="admin-tabs">
+        <button id="tab-btn-consults" class="admin-tab-btn active" onclick="switchAdminTab('consults')">📋 Consultas</button>
+        <button id="tab-btn-media" class="admin-tab-btn" onclick="switchAdminTab('media')">⚙️ Conteúdos & Contactos</button>
+      </div>
+
+      <!-- ABA 1: CONSULTAS RECEBIDAS -->
+      <div id="admin-main-view" class="admin-body">
+        <div id="firebase-status-banner" class="sync-banner local">
+          <span>⚠️ Modo Local (Verifique regras do Firestore)</span>
+        </div>
+
+        <!-- Resumo Estatístico -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-total">0</div>
+            <div class="stat-label">Total de Consultas</div>
+          </div>
+          <div class="stat-card urgent">
+            <div class="stat-num" id="stat-high" style="color:var(--red);">0</div>
+            <div class="stat-label">Atenção Prioritária</div>
+          </div>
+          <div class="stat-card mod">
+            <div class="stat-num" id="stat-moderate" style="color:#b56c00;">0</div>
+            <div class="stat-label">Sinais Moderados</div>
+          </div>
+          <div class="stat-card ok">
+            <div class="stat-num" id="stat-pending" style="color:var(--teal);">0</div>
+            <div class="stat-label">Por Analisar</div>
+          </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="admin-toolbar">
+          <button class="filter-chip active" onclick="setAdminFilter('all', this)">Todas</button>
+          <button class="filter-chip" onclick="setAdminFilter('high', this)">Prioritárias</button>
+          <button class="filter-chip" onclick="setAdminFilter('moderate', this)">Moderadas</button>
+          <button class="filter-chip" onclick="setAdminFilter('low', this)">Estáveis</button>
+          <button class="filter-chip" onclick="setAdminFilter('pending', this)">Pendentes</button>
+        </div>
+
+        <!-- Exportar / Limpar -->
+        <div class="admin-actions-row">
+          <button class="action-small-btn" onclick="exportConsultationsCSV()">📥 Exportar CSV</button>
+          <button class="action-small-btn" style="color:var(--red);" onclick="clearAllConsultations()">🗑️ Limpar Local</button>
+        </div>
+
+        <!-- Lista de Visitantes/Consultas -->
+        <div id="admin-consult-list" class="consult-list"></div>
+      </div>
+
+      <!-- Vista de Análise Individual da Consulta -->
+      <div id="admin-detail-view" class="admin-body" style="display:none;">
+        <button class="action-small-btn" style="flex:none; text-align:left;" onclick="closeConsultationDetail()">&#8592; Voltar à Lista de Consultas</button>
+        <div id="detail-content" class="detail-box"></div>
+      </div>
+
+      <!-- ABA 2: QUEM SOMOS, WHATSAPP E VÍDEOS POR LINK GRATUITO -->
+      <div id="admin-media-view" class="admin-body" style="display:none;">
+
+        <!-- Configuração da Secção Quem Somos (Telefones e E-mail) -->
+        <div class="admin-card-box">
+          <h4>ℹ️ Editar "Quem Somos" (Telefones e E-mail)</h4>
+          <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">
+            Estes dados aparecem quando o visitante clica em <strong>Quem Somos</strong> na página inicial.
+          </p>
+
+          <div class="contact-field">
+            <label for="admin-about-desc">Texto de Apresentação</label>
+            <textarea id="admin-about-desc" class="admin-notes" placeholder="Escreva sobre a missão e a equipa do Mente Segura..."></textarea>
+          </div>
+
+          <div class="contact-field">
+            <label for="admin-about-phone1">Número de Telefone Principal</label>
+            <input type="tel" id="admin-about-phone1" class="contact-input" placeholder="Ex: +258 84 123 4567" />
+          </div>
+
+          <div class="contact-field">
+            <label for="admin-about-phone2">Número de Telefone Alternativo (opcional)</label>
+            <input type="tel" id="admin-about-phone2" class="contact-input" placeholder="Ex: +258 82 987 6543" />
+          </div>
+
+          <div class="contact-field">
+            <label for="admin-about-email">E-mail de Contacto</label>
+            <input type="email" id="admin-about-email" class="contact-input" placeholder="Ex: contacto@mentesegura.co.mz" />
+          </div>
+
+          <button class="btn btn-teal" style="margin-top:4px; padding:12px;" onclick="saveAboutSettings()">
+            Guardar Dados de "Quem Somos"
+          </button>
+          <div id="about-admin-feedback" class="contact-feedback"></div>
+        </div>
+
+        <!-- Configuração do Número de WhatsApp -->
+        <div class="admin-card-box">
+          <h4>💬 Configuração do WhatsApp</h4>
+          <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.4;">
+            Coloque o número com código do país (Ex: <strong>258841234567</strong>) para ativar o botão do WhatsApp para os visitantes.
+          </p>
+
+          <div class="contact-field">
+            <label for="admin-wa-number">Número do WhatsApp (com 258)</label>
+            <input type="tel" id="admin-wa-number" class="contact-input" placeholder="Ex: 258841234567" />
+          </div>
+
+          <div class="contact-field">
+            <label for="admin-wa-message">Mensagem Inicial Automática</label>
+            <input type="text" id="admin-wa-message" class="contact-input" placeholder="Ex: Olá! Gostaria de falar com o apoio Mente Segura." />
+          </div>
+
+          <button class="btn btn-whatsapp" style="margin-top:4px; padding:12px;" onclick="saveWhatsAppSettings()">
+            Guardar Número de WhatsApp
+          </button>
+          <div id="wa-admin-feedback" class="contact-feedback"></div>
+        </div>
+
+        <!-- Adicionar Vídeo via Link Gratuito -->
+        <div class="admin-card-box">
+          <h4>🎬 Adicionar Vídeo (100% Gratuito)</h4>
+          <div class="hint-box">
+            <strong>Opções gratuitas aceites:</strong><br>
+            • <strong>YouTube:</strong> Cole o link normal ou Shorts do YouTube.<br>
+            • <strong>Google Drive:</strong> Carregue o vídeo no Google Drive, partilhe como <em>"Qualquer pessoa com o link"</em> e cole o link aqui.<br>
+            • <strong>Ficheiro .mp4 direto:</strong> Link de vídeo hospedado no GitHub ou servidor gratuito.
+          </div>
+
+          <div class="contact-field">
+            <label for="admin-video-title">Título do Vídeo</label>
+            <input type="text" id="admin-video-title" class="contact-input" placeholder="Ex: Exercício para acalmar a ansiedade" />
+          </div>
+
+          <div class="contact-field">
+            <label for="admin-video-url">Link do Vídeo (YouTube, Google Drive ou .mp4)</label>
+            <input type="url" id="admin-video-url" class="contact-input" placeholder="https://youtu.be/... ou https://drive.google.com/..." />
+          </div>
+
+          <div class="contact-field">
+            <label for="admin-video-desc">Descrição (opcional)</label>
+            <input type="text" id="admin-video-desc" class="contact-input" placeholder="Breve resumo do vídeo..." />
+          </div>
+
+          <button id="publish-video-btn" class="btn btn-teal" style="margin-top:4px; padding:12px;" onclick="publishVideoByLink()">
+            + Publicar Vídeo na Página
+          </button>
+          <div id="video-admin-feedback" class="contact-feedback"></div>
+        </div>
+
+        <!-- Lista de Vídeos Publicados -->
+        <div class="admin-card-box">
+          <h4>📂 Vídeos Publicados (<span id="admin-videos-count">0</span>)</h4>
+          <div id="admin-videos-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODAL DE SIMULAÇÃO DE CHAMADA -->
+    <div id="call-modal" class="call-modal">
+      <div class="pulse-ring">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="white">
+          <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.46.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z"/>
+        </svg>
+      </div>
+      <h3 id="call-service" style="font-size:1.3rem; margin-bottom:6px;">A ligar...</h3>
+      <p id="call-number" style="font-size:1.6rem; font-weight:800; color:#f5b841; margin-bottom:12px;">800 123 456</p>
+      <p style="font-size:0.9rem; opacity:0.85; max-width:260px; margin-bottom:28px;">
+        Ligação gratuita e confidencial. Em telemóvel real, este botão abre o marcador telefónico (<code style="color:#f5b841;">tel:800123456</code>).
+      </p>
+      <button class="btn btn-red" style="max-width:220px;" onclick="endCall()">Desligar</button>
     </div>
 
-    <!-- TOTAIS EM TEMPO REAL -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow flex flex-col justify-between">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Entradas</span>
-          <span class="text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium">Acumulado (+)</span>
-        </div>
-        <div id="valorEntradaTotal" class="text-3xl font-bold text-emerald-400 mt-3">0,00 MT</div>
-        <p class="text-xs text-slate-500 mt-2">Soma dos recebimentos</p>
-      </div>
+  </main>
 
-      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow flex flex-col justify-between">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Saídas</span>
-          <span class="text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium">Pagamentos (-)</span>
-        </div>
-        <div id="valorSaidaTotal" class="text-3xl font-bold text-rose-400 mt-3">0,00 MT</div>
-        <p class="text-xs text-slate-500 mt-2">Soma das despesas e custos</p>
-      </div>
+  <!-- Firebase SDK (Apenas App + Firestore — Plano Gratuito Spark) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow flex flex-col justify-between">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Remanescente</span>
-          <span id="badgeStatus" class="text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium">Saldo Atual</span>
-        </div>
-        <div id="valorRemanescente" class="text-3xl font-bold text-blue-400 mt-3">0,00 MT</div>
-        <p class="text-xs text-slate-500 mt-2">Total líquido que restou</p>
-      </div>
-    </div>
-
-    <!-- ÁREA DE LANÇAMENTO E TABELA -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Painel de Lançamento (Admin) -->
-      <div id="painelFormularioAdmin" class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow h-fit hidden">
-        <div class="flex border-b border-slate-700 mb-5">
-          <button id="btnAbaEntrada" onclick="mudarAba('entrada')" 
-            class="flex-1 pb-2 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition">
-            + Adicionar Entrada
-          </button>
-          <button id="btnAbaSaida" onclick="mudarAba('saida')" 
-            class="flex-1 pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
-            - Registrar Saída
-          </button>
-        </div>
-
-        <!-- Form Entrada -->
-        <form id="formEntrada" class="space-y-4" onsubmit="salvarLancamento(event, 'entrada')">
-          <div>
-            <label class="block text-xs text-slate-400 mb-1 font-medium">Comprovativo <span class="text-slate-500">(PDF, JPG, PNG)</span></label>
-            <input type="file" id="evidenciaEntrada" accept=".pdf,image/jpeg,image/png"
-              class="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-900 rounded-lg p-1.5 border border-slate-700">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1 font-medium">Origem / Descrição</label>
-            <input type="text" id="descEntrada" placeholder="Ex: Entrada de Caixa" required
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-400 mb-1 font-medium">Valor (MT)</label>
-              <input type="number" id="valorEntrada" step="0.01" min="0.01" placeholder="0.00" required
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1 font-medium">Data</label>
-              <input type="date" id="dataEntrada" required
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1 font-medium">Método</label>
-            <select id="metodoEntrada" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-sm text-white focus:outline-none">
-              <option value="M-Pesa">M-Pesa</option>
-              <option value="e-Mola">e-Mola</option>
-              <option value="Transferência Bancária">Transferência</option>
-              <option value="Numerário em Mão">Numerário</option>
-            </select>
-          </div>
-          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg transition shadow">
-            + Subir Valor nas Entradas
-          </button>
-        </form>
-
-        <!-- Form Saída -->
-        <form id="formSaida" class="space-y-4 hidden" onsubmit="salvarLancamento(event, 'saida')">
-          <div>
-            <label class="block text-xs text-slate-400 mb-1 font-medium">Fatura / Recibo <span class="text-slate-500">(PDF, JPG, PNG)</span></label>
-            <input type="file" id="evidenciaSaida" accept=".pdf,image/jpeg,image/png"
-              class="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-rose-600 file:text-white hover:file:bg-rose-500 cursor-pointer bg-slate-900 rounded-lg p-1.5 border border-slate-700">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1 font-medium">Descrição da Despesa</label>
-            <input type="text" id="descSaida" placeholder="Ex: Pagamento de Fornecedor" required
-              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-400 mb-1 font-medium">Valor (MT)</label>
-              <input type="number" id="valorSaida" step="0.01" min="0.01" placeholder="0.00" required
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1 font-medium">Data</label>
-              <input type="date" id="dataSaida" required
-                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs text-slate-400 mb-1 font-medium">Categoria</label>
-              <select id="catSaida" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-sm text-white focus:outline-none">
-                <option value="Peças & Componentes">Peças & Componentes</option>
-                <option value="Equipamentos">Equipamentos</option>
-                <option value="Logística">Logística</option>
-                <option value="Outros">Outros</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1 font-medium">Método</label>
-              <select id="metodoSaida" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-sm text-white focus:outline-none">
-                <option value="M-Pesa">M-Pesa</option>
-                <option value="e-Mola">e-Mola</option>
-                <option value="Transferência Bancária">Transferência</option>
-                <option value="Numerário">Numerário</option>
-              </select>
-            </div>
-          </div>
-          <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-lg transition shadow">
-            - Descontar nas Saídas
-          </button>
-        </form>
-      </div>
-
-      <!-- Tabela de Movimentações -->
-      <div id="colunaTabela" class="lg:col-span-3 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow overflow-hidden flex flex-col">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
-          <h2 class="text-lg font-semibold text-white">Extrato de Movimentações</h2>
-          <div class="flex gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700 text-xs">
-            <button onclick="filtrarTabela('todos')" id="filtro-todos" class="px-2.5 py-1 rounded bg-slate-700 text-white font-medium">Todos</button>
-            <button onclick="filtrarTabela('entrada')" id="filtro-entrada" class="px-2.5 py-1 rounded text-slate-400 hover:text-white">Entradas (+)</button>
-            <button onclick="filtrarTabela('saida')" id="filtro-saida" class="px-2.5 py-1 rounded text-slate-400 hover:text-white">Saídas (-)</button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
-                <th class="py-3 px-2">Data</th>
-                <th class="py-3 px-2">Tipo</th>
-                <th class="py-3 px-2">Descrição</th>
-                <th class="py-3 px-2">Método</th>
-                <th class="py-3 px-2 text-right">Valor</th>
-                <th class="py-3 px-2 text-center">Evidência</th>
-                <th id="thAcao" class="py-3 px-2 text-center hidden">Ação</th>
-              </tr>
-            </thead>
-            <tbody id="tabelaCorpo" class="divide-y divide-slate-700/60 text-sm"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de Evidência -->
-  <div id="modalEvidencia" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50 backdrop-blur-sm" onclick="fecharModal()">
-    <div class="bg-slate-800 p-4 rounded-xl max-w-3xl w-full border border-slate-700 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
-      <div class="flex justify-between items-center mb-3">
-        <h3 id="modalTitulo" class="font-semibold text-white truncate pr-2">Evidência Anexada</h3>
-        <button onclick="fecharModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
-      </div>
-      <div id="modalConteudo" class="flex-1 overflow-auto rounded-lg bg-slate-900 min-h-[300px] flex items-center justify-center p-2"></div>
-    </div>
-  </div>
-
-  <!-- ================= FIREBASE REALTIME SDK (ES MODULES) ================= -->
-  <script type="module">
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
-
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyA0Rw-FHQE2aJ7TckdScghtlWdxGnMgfu4",
-  authDomain: "relatorio-a94ea.firebaseapp.com",
-  databaseURL: "https://relatorio-a94ea-default-rtdb.firebaseio.com",
-  projectId: "relatorio-a94ea",
-  storageBucket: "relatorio-a94ea.firebasestorage.app",
-  messagingSenderId: "590619131231",
-  appId: "1:590619131231:web:ffb1aa102d3b166d304aea",
-  measurementId: "G-61DZ3FC1FZ"
-};
-
-    // -------------------------------------------------------------
-    // Cole aqui as chaves do seu projeto Firebase (Console do Firebase)
-    // -------------------------------------------------------------
-   
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const registrosRef = ref(db, 'caixa/lancamentos');
-
-    // Variáveis de Estado
-    let listaRegistros = [];
-    let filtroAtual = 'todos';
-
-    // OUVINTE EM TEMPO REAL: Qualquer aparelho aberto atualiza aqui instantaneamente
-    onValue(registrosRef, (snapshot) => {
-      const data = snapshot.val();
-      listaRegistros = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          listaRegistros.push({ fbKey: key, ...data[key] });
-        });
-      }
-      atualizarPainel();
-    }, (error) => {
-      console.warn("Sem conexão com o Firebase, operando localmente:", error);
-    });
-
-    // Funções globais ligadas ao Firebase
-    window.salvarLancamentoNoFirebase = function(item) {
-      const novoRef = push(registrosRef);
-      set(novoRef, item);
-    };
-
-    window.removerItemDoFirebase = function(fbKey) {
-      const itemRef = ref(db, `caixa/lancamentos/${fbKey}`);
-      remove(itemRef);
-    };
-
-    window.limparTudoNoFirebase = function() {
-      set(registrosRef, null);
-    };
-
-    window.obterListaRegistros = () => listaRegistros;
-    window.definirFiltro = (f) => { filtroAtual = f; atualizarPainel(); };
-    window.obterFiltro = () => filtroAtual;
-  </script>
-
-  <!-- ================= LÓGICA DE INTERFACE E EVENTOS ================= -->
   <script>
-    const USER_ADMIN = "meliogaby";
-    const PASS_ADMIN = "842203592";
-    const hoje = new Date().toISOString().split('T')[0];
+    // =========================================================================
+    // 1. CREDENCIAIS DA ADMINISTRADORA
+    // =========================================================================
+    const ADMIN_USERNAME = "consulta";
+    const ADMIN_PASSWORD = "123322";
 
-    document.getElementById('dataSaida').value = hoje;
-    document.getElementById('dataEntrada').value = hoje;
+    // =========================================================================
+    // 2. CONFIGURAÇÃO DO FIREBASE (CLOUD FIRESTORE GRATUITO) - MENTE SEGURA
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDtANZZmuiZYgN9aODxU0T2gAid85phn3I",
+      authDomain: "mente-segura-mz.firebaseapp.com",
+      projectId: "mente-segura-mz",
+      storageBucket: "mente-segura-mz.firebasestorage.app",
+      messagingSenderId: "974367411172",
+      appId: "1:974367411172:web:840a4b7270fb3ddf5095f1"
+    };
 
-    function formatarMoeda(valor) {
-      return Number(valor).toLocaleString('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MT';
-    }
+    let db = null;
+    let firebaseReady = false;
+    let consultationsCache = [];
+    let videosCache = [];
 
-    function isAdminLogado() {
-      return sessionStorage.getItem('admin_autenticado') === 'true';
-    }
+    let whatsappConfig = {
+      number: "",
+      message: "Olá! Vim pelo Mente Segura e gostaria de conversar."
+    };
 
-    function atualizarVisaoPermissoes() {
-      const logado = isAdminLogado();
-      const rotulo = document.getElementById('rotuloPerfil');
-      const btnAbrirLogin = document.getElementById('btnAbrirLogin');
-      const btnSairAdmin = document.getElementById('btnSairAdmin');
-      const painelForm = document.getElementById('painelFormularioAdmin');
-      const btnLimpar = document.getElementById('btnLimparDados');
-      const thAcao = document.getElementById('thAcao');
-      const colunaTabela = document.getElementById('colunaTabela');
+    let aboutConfig = {
+      description: "O Mente Segura é uma plataforma dedicada ao apoio psicológico, acolhimento emocional e promoção do bem-estar mental em Moçambique.\n\nOferecemos um espaço confidencial, acessível e seguro para orientação inicial, conteúdos educativos e encaminhamento profissional.",
+      phone1: "800 123 456",
+      phone2: "+258 84 000 0000",
+      email: "contacto@mentesegura.co.mz"
+    };
 
-      if (logado) {
-        rotulo.textContent = "Administrador Conectado";
-        rotulo.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-        btnAbrirLogin.classList.add('hidden');
-        btnSairAdmin.classList.remove('hidden');
-        painelForm.classList.remove('hidden');
-        btnLimpar.classList.remove('hidden');
-        thAcao.classList.remove('hidden');
-        colunaTabela.className = "lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow overflow-hidden flex flex-col";
-      } else {
-        rotulo.textContent = "Visitante (Consulta)";
-        rotulo.className = "text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30";
-        btnAbrirLogin.classList.remove('hidden');
-        btnSairAdmin.classList.add('hidden');
-        painelForm.classList.add('hidden');
-        btnLimpar.classList.add('hidden');
-        thAcao.classList.add('hidden');
-        colunaTabela.className = "lg:col-span-3 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow overflow-hidden flex flex-col";
+    let unsubscribeConsults = null;
+    let unsubscribeVideos = null;
+    let unsubscribeSettings = null;
+    let unsubscribeAbout = null;
+
+    const COLLECTION_CONSULTS = "consultas_mente_segura";
+    const COLLECTION_VIDEOS = "videos_mente_segura";
+    const COLLECTION_SETTINGS = "config_mente_segura";
+
+    const STORAGE_KEY_CONSULTS = "mente_segura_consultas_v1";
+    const STORAGE_KEY_VIDEOS = "mente_segura_videos_v1";
+    const STORAGE_KEY_WA = "mente_segura_wa_v1";
+    const STORAGE_KEY_ABOUT = "mente_segura_about_v1";
+
+    try {
+      if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("COLE_AQUI")) {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        firebaseReady = true;
       }
-      atualizarPainel();
+    } catch (err) {
+      console.warn("Firebase em espera de configuração:", err);
+      firebaseReady = false;
     }
 
-    function abrirModalLogin() {
-      document.getElementById('telaLogin').classList.remove('hidden');
-      document.getElementById('telaLogin').classList.add('flex');
-    }
+    let isAdminAuthenticated = false;
+    let currentAdminFilter = "all";
+    let lastConsultationDocId = null;
+    let activeDetailId = null;
 
-    function fecharModalLogin() {
-      document.getElementById('telaLogin').classList.add('hidden');
-      document.getElementById('telaLogin').classList.remove('flex');
-      document.getElementById('erroLogin').classList.add('hidden');
-    }
+    // Carrega dados iniciais (Quem Somos, Vídeos e WhatsApp) ao abrir a página
+    initPublicData();
 
-    function alternarSenha() {
-      const input = document.getElementById('loginPass');
-      input.type = input.type === 'password' ? 'text' : 'password';
-    }
+    function initPublicData() {
+      if (firebaseReady && db) {
+        unsubscribeAbout = db.collection(COLLECTION_SETTINGS).doc("quem_somos")
+          .onSnapshot((doc) => {
+            if (doc.exists) {
+              aboutConfig = { ...aboutConfig, ...doc.data() };
+            }
+            renderAboutScreen();
+          }, (err) => console.warn("Erro ao ler Quem Somos:", err));
 
-    function fazerLogin(event) {
-      event.preventDefault();
-      const u = document.getElementById('loginUser').value.trim();
-      const p = document.getElementById('loginPass').value;
-      if (u === USER_ADMIN && p === PASS_ADMIN) {
-        sessionStorage.setItem('admin_autenticado', 'true');
-        fecharModalLogin();
-        document.getElementById('loginUser').value = '';
-        document.getElementById('loginPass').value = '';
-        atualizarVisaoPermissoes();
+        unsubscribeSettings = db.collection(COLLECTION_SETTINGS).doc("whatsapp")
+          .onSnapshot((doc) => {
+            if (doc.exists) {
+              whatsappConfig = { ...whatsappConfig, ...doc.data() };
+            }
+            applyWhatsAppUI();
+          }, (err) => console.warn("Erro ao ler config WhatsApp:", err));
+
+        unsubscribeVideos = db.collection(COLLECTION_VIDEOS)
+          .orderBy("createdAtMs", "desc")
+          .onSnapshot((snapshot) => {
+            videosCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderVisitorVideos();
+            renderAdminVideosList();
+          }, (err) => console.warn("Erro ao ler vídeos:", err));
       } else {
-        document.getElementById('erroLogin').classList.remove('hidden');
-      }
-    }
+        try {
+          const savedAbout = JSON.parse(localStorage.getItem(STORAGE_KEY_ABOUT));
+          if (savedAbout) aboutConfig = { ...aboutConfig, ...savedAbout };
+        } catch (e) {}
 
-    function fazerLogout() {
-      sessionStorage.removeItem('admin_autenticado');
-      atualizarVisaoPermissoes();
-    }
+        try {
+          const savedWa = JSON.parse(localStorage.getItem(STORAGE_KEY_WA));
+          if (savedWa) whatsappConfig = { ...whatsappConfig, ...savedWa };
+        } catch (e) {}
 
-    // CÁLCULO E SINCRONIZAÇÃO NA TELA
-    function atualizarPainel() {
-      if (!window.obterListaRegistros) return;
-      const registros = window.obterListaRegistros();
-      let totalEntrada = 0;
-      let totalSaida = 0;
-
-      registros.forEach(item => {
-        const v = parseFloat(item.valor) || 0;
-        if (item.tipo === 'entrada') totalEntrada += v;
-        else if (item.tipo === 'saida') totalSaida += v;
-      });
-
-      const remanescente = totalEntrada - totalSaida;
-
-      document.getElementById('valorEntradaTotal').textContent = formatarMoeda(totalEntrada);
-      document.getElementById('valorSaidaTotal').textContent = formatarMoeda(totalSaida);
-
-      const remElem = document.getElementById('valorRemanescente');
-      const badgeStatus = document.getElementById('badgeStatus');
-      remElem.textContent = formatarMoeda(remanescente);
-
-      if (remanescente < 0) {
-        remElem.className = 'text-3xl font-bold text-rose-500 mt-3';
-        badgeStatus.className = 'text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium';
-        badgeStatus.textContent = 'Déficit (Negativo)';
-      } else {
-        remElem.className = 'text-3xl font-bold text-blue-400 mt-3';
-        badgeStatus.className = 'text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium';
-        badgeStatus.textContent = 'Saldo Restante';
-      }
-
-      renderizarTabela(registros);
-    }
-
-    function salvarLancamento(event, tipo) {
-      event.preventDefault();
-      if (!isAdminLogado()) return;
-
-      const fileInput = document.getElementById(tipo === 'saida' ? 'evidenciaSaida' : 'evidenciaEntrada');
-      const file = fileInput.files[0];
-
-      const prosseguir = (arquivoDados = null, nome = 'Sem comprovativo', mime = null) => {
-        const novoItem = {
-          tipo: tipo,
-          data: tipo === 'saida' ? document.getElementById('dataSaida').value : document.getElementById('dataEntrada').value,
-          descricao: tipo === 'saida' ? document.getElementById('descSaida').value : document.getElementById('descEntrada').value,
-          valor: parseFloat(tipo === 'saida' ? document.getElementById('valorSaida').value : document.getElementById('valorEntrada').value),
-          categoria: tipo === 'saida' ? document.getElementById('catSaida').value : 'Entrada/Depósito',
-          metodo: tipo === 'saida' ? document.getElementById('metodoSaida').value : document.getElementById('metodoEntrada').value,
-          nomeArquivo: nome,
-          arquivoBase64: arquivoDados,
-          tipoMime: mime
-        };
-
-        window.salvarLancamentoNoFirebase(novoItem);
-
-        if (tipo === 'saida') {
-          document.getElementById('formSaida').reset();
-          document.getElementById('dataSaida').value = hoje;
-        } else {
-          document.getElementById('formEntrada').reset();
-          document.getElementById('dataEntrada').value = hoje;
+        try {
+          videosCache = JSON.parse(localStorage.getItem(STORAGE_KEY_VIDEOS)) || [];
+        } catch (e) {
+          videosCache = [];
         }
+
+        renderAboutScreen();
+        applyWhatsAppUI();
+        renderVisitorVideos();
+        renderAdminVideosList();
+      }
+    }
+
+    // ================= ECRÃ QUEM SOMOS =================
+    function openAboutScreen() {
+      renderAboutScreen();
+      goToScreen("screen-about");
+    }
+
+    function renderAboutScreen() {
+      const descEl = document.getElementById("about-description-text");
+      const contactsContainer = document.getElementById("about-contacts-container");
+      if (!descEl || !contactsContainer) return;
+
+      descEl.textContent = aboutConfig.description || "";
+      contactsContainer.innerHTML = "";
+
+      if (aboutConfig.phone1) {
+        const clean1 = aboutConfig.phone1.replace(/\s+/g, "");
+        contactsContainer.innerHTML += `
+          <a class="contact-detail-row" href="tel:${escapeAttr(clean1)}">
+            <div class="contact-icon-badge">📞</div>
+            <div>
+              <div class="contact-detail-label">Telefone Principal</div>
+              <div class="contact-detail-val">${escapeHtml(aboutConfig.phone1)}</div>
+            </div>
+          </a>
+        `;
+      }
+
+      if (aboutConfig.phone2) {
+        const clean2 = aboutConfig.phone2.replace(/\s+/g, "");
+        contactsContainer.innerHTML += `
+          <a class="contact-detail-row" href="tel:${escapeAttr(clean2)}">
+            <div class="contact-icon-badge">📱</div>
+            <div>
+              <div class="contact-detail-label">Telefone Alternativo</div>
+              <div class="contact-detail-val">${escapeHtml(aboutConfig.phone2)}</div>
+            </div>
+          </a>
+        `;
+      }
+
+      if (aboutConfig.email) {
+        contactsContainer.innerHTML += `
+          <a class="contact-detail-row" href="mailto:${escapeAttr(aboutConfig.email)}">
+            <div class="contact-icon-badge">✉️</div>
+            <div>
+              <div class="contact-detail-label">E-mail</div>
+              <div class="contact-detail-val">${escapeHtml(aboutConfig.email)}</div>
+            </div>
+          </a>
+        `;
+      }
+    }
+
+    function applyWhatsAppUI() {
+      const cleanNum = (whatsappConfig.number || "").replace(/\D/g, "");
+      const hasWa = cleanNum.length >= 8;
+
+      const homeBtn = document.getElementById("home-wa-btn");
+      const floatBtn = document.getElementById("floating-wa-btn");
+      const resultBtn = document.getElementById("result-wa-btn");
+      const emergBtn = document.getElementById("emergency-wa-btn");
+
+      if (homeBtn) homeBtn.style.display = hasWa ? "inline-flex" : "none";
+      if (floatBtn) {
+        if (hasWa) floatBtn.classList.add("visible");
+        else floatBtn.classList.remove("visible");
+      }
+      if (resultBtn) resultBtn.style.display = hasWa ? "inline-flex" : "none";
+      if (emergBtn) emergBtn.style.display = hasWa ? "inline-flex" : "none";
+
+      const adminNumInput = document.getElementById("admin-wa-number");
+      const adminMsgInput = document.getElementById("admin-wa-message");
+      if (adminNumInput && !adminNumInput.value) adminNumInput.value = whatsappConfig.number || "";
+      if (adminMsgInput && !adminMsgInput.value) adminMsgInput.value = whatsappConfig.message || "";
+    }
+
+    function openWhatsAppChat() {
+      const cleanNum = (whatsappConfig.number || "").replace(/\D/g, "");
+      if (!cleanNum) return;
+      const text = encodeURIComponent(whatsappConfig.message || "Olá! Gostaria de falar com o apoio Mente Segura.");
+      const waUrl = `https://wa.me/${cleanNum}?text=${text}`;
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    }
+
+    // ================= GALERIA DE VÍDEOS (LINKS GRATUITOS) =================
+    function openVideosScreen() {
+      renderVisitorVideos();
+      goToScreen("screen-videos");
+    }
+
+    function parseVideoSource(url) {
+      if (!url) return { type: "direct", embedUrl: "", downloadUrl: "" };
+
+      // 1. YouTube (watch, youtu.be, shorts, embed)
+      const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch) {
+        return {
+          type: "iframe",
+          embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}`,
+          downloadUrl: url,
+          btnLabel: "🔗 Abrir no YouTube"
+        };
+      }
+
+      // 2. Google Drive (/file/d/ID/view ou ?id=ID)
+      const driveMatch = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/);
+      if (driveMatch) {
+        const fileId = driveMatch[1];
+        return {
+          type: "iframe",
+          embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
+          downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+          btnLabel: "⬇️ Baixar Vídeo"
+        };
+      }
+
+      // 3. Link direto (.mp4, .webm, GitHub raw, etc.)
+      return {
+        type: "direct",
+        embedUrl: url,
+        downloadUrl: url,
+        btnLabel: "⬇️ Baixar Vídeo"
       };
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => prosseguir(e.target.result, file.name, file.type);
-        reader.readAsDataURL(file);
-      } else {
-        prosseguir();
-      }
     }
 
-    function removerItem(fbKey) {
-      if (!isAdminLogado()) return;
-      if (confirm('Deseja eliminar este registo? Ele será removido em tempo real de todos os aparelhos.')) {
-        window.removerItemDoFirebase(fbKey);
-      }
-    }
+    function renderVisitorVideos() {
+      const container = document.getElementById("visitor-videos-list");
+      if (!container) return;
 
-    function confirmarLimpeza() {
-      if (!isAdminLogado()) return;
-      if (confirm('Atenção: isto apagará os dados em todos os aparelhos. Continuar?')) {
-        window.limparTudoNoFirebase();
-      }
-    }
-
-    function mudarAba(aba) {
-      const btnSaida = document.getElementById('btnAbaSaida');
-      const btnEntrada = document.getElementById('btnAbaEntrada');
-      const formSaida = document.getElementById('formSaida');
-      const formEntrada = document.getElementById('formEntrada');
-
-      if (aba === 'saida') {
-        btnSaida.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-rose-500 text-rose-400 transition';
-        btnEntrada.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
-        formSaida.classList.remove('hidden');
-        formEntrada.classList.add('hidden');
-      } else {
-        btnEntrada.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition';
-        btnSaida.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
-        formEntrada.classList.remove('hidden');
-        formSaida.classList.add('hidden');
-      }
-    }
-
-    function filtrarTabela(tipo) {
-      window.definirFiltro(tipo);
-      ['todos', 'entrada', 'saida'].forEach(t => {
-        const btn = document.getElementById(`filtro-${t}`);
-        btn.className = (t === tipo) 
-          ? 'px-2.5 py-1 rounded bg-slate-700 text-white font-medium' 
-          : 'px-2.5 py-1 rounded text-slate-400 hover:text-white';
-      });
-    }
-
-    function renderizarTabela(registros) {
-      const corpo = document.getElementById('tabelaCorpo');
-      corpo.innerHTML = '';
-      const admin = isAdminLogado();
-      const filtro = window.obterFiltro ? window.obterFiltro() : 'todos';
-
-      const filtrados = registros.filter(r => filtro === 'todos' || r.tipo === filtro);
-
-      if (filtrados.length === 0) {
-        corpo.innerHTML = `<tr><td colspan="${admin ? '7' : '6'}" class="py-8 text-center text-slate-500 text-sm">Nenhum registo disponível.</td></tr>`;
+      if (videosCache.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            🎬 Ainda não há vídeos publicados.<br>
+            <span style="font-size:0.8rem;">Volte em breve para assistir aos conteúdos de apoio e bem-estar.</span>
+          </div>
+        `;
         return;
       }
 
-      filtrados.slice().reverse().forEach(item => {
-        const isEntrada = item.tipo === 'entrada';
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-700/30 transition';
+      container.innerHTML = "";
+      videosCache.forEach(v => {
+        const card = document.createElement("div");
+        card.className = "video-card";
 
-        let botaoEvidencia = '<span class="text-slate-600 text-xs">—</span>';
-        if (item.arquivoBase64) {
-          const isPdf = item.nomeArquivo && (item.nomeArquivo.toLowerCase().endsWith('.pdf') || item.tipoMime === 'application/pdf');
-          botaoEvidencia = `
-            <button onclick="abrirEvidencia('${item.fbKey}')" class="text-blue-400 hover:text-blue-300 text-xs underline font-medium">
-              Ver ${isPdf ? 'PDF' : 'Imagem'}
-            </button>
-          `;
+        const parsed = parseVideoSource(v.url);
+        let mediaHtml = "";
+
+        if (parsed.type === "iframe") {
+          mediaHtml = `<iframe src="${escapeHtml(parsed.embedUrl)}" title="${escapeHtml(v.title)}" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>`;
+        } else {
+          mediaHtml = `<video controls preload="metadata" playsinline src="${escapeHtml(parsed.embedUrl)}"></video>`;
         }
 
-        let colunaAcao = '';
-        if (admin) {
-          colunaAcao = `
-            <td class="py-3 px-2 text-center">
-              <button onclick="removerItem('${item.fbKey}')" class="text-slate-500 hover:text-rose-400 text-sm transition font-bold" title="Excluir">&times;</button>
-            </td>
-          `;
-        }
-
-        tr.innerHTML = `
-          <td class="py-3 px-2 text-slate-300 whitespace-nowrap">${item.data}</td>
-          <td class="py-3 px-2">
-            <span class="px-2 py-0.5 rounded text-[11px] font-semibold ${isEntrada ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">
-              ${isEntrada ? 'Entrada (+)' : 'Saída (-)'}
-            </span>
-          </td>
-          <td class="py-3 px-2 font-medium text-white">${item.descricao}</td>
-          <td class="py-3 px-2 text-slate-300 text-xs">${item.metodo}</td>
-          <td class="py-3 px-2 text-right font-semibold whitespace-nowrap ${isEntrada ? 'text-emerald-400' : 'text-rose-400'}">
-            ${isEntrada ? '+' : '-'} ${formatarMoeda(item.valor)}
-          </td>
-          <td class="py-3 px-2 text-center whitespace-nowrap">${botaoEvidencia}</td>
-          ${colunaAcao}
+        card.innerHTML = `
+          <div class="video-media-wrap">
+            ${mediaHtml}
+          </div>
+          <div class="video-info">
+            <div class="video-title">${escapeHtml(v.title)}</div>
+            ${v.description ? `<div class="video-desc">${escapeHtml(v.description)}</div>` : ""}
+            <div class="video-actions">
+              <span class="video-date">📅 ${v.date || ""}</span>
+              <button class="btn-download-video" onclick="handleVideoDownload('${escapeAttr(parsed.downloadUrl)}', '${escapeAttr(v.title)}', '${parsed.type}')">
+                ${parsed.btnLabel}
+              </button>
+            </div>
+          </div>
         `;
-        corpo.appendChild(tr);
+        container.appendChild(card);
       });
     }
 
-    function abrirEvidencia(fbKey) {
-      const registros = window.obterListaRegistros();
-      const item = registros.find(r => r.fbKey === fbKey);
-      if (!item || !item.arquivoBase64) return;
+    async function handleVideoDownload(downloadUrl, title, sourceType) {
+      if (!downloadUrl) return;
 
-      document.getElementById('modalTitulo').textContent = `${item.descricao} (${formatarMoeda(item.valor)})`;
-      const container = document.getElementById('modalConteudo');
-      container.innerHTML = '';
-
-      if (item.tipoMime === 'application/pdf' || item.nomeArquivo.toLowerCase().endsWith('.pdf')) {
-        const iframe = document.createElement('iframe');
-        iframe.src = item.arquivoBase64;
-        iframe.className = 'w-full h-[65vh] rounded border-0';
-        container.appendChild(iframe);
-      } else {
-        const img = document.createElement('img');
-        img.src = item.arquivoBase64;
-        img.className = 'max-w-full max-h-[70vh] object-contain rounded';
-        container.appendChild(img);
+      if (sourceType === "iframe") {
+        window.open(downloadUrl, "_blank", "noopener,noreferrer");
+        return;
       }
 
-      document.getElementById('modalEvidencia').classList.remove('hidden');
-      document.getElementById('modalEvidencia').classList.add('flex');
+      const safeName = (title || "video_mente_segura").replace(/[^a-zA-Z0-9._-]/g, "_") + ".mp4";
+
+      try {
+        const response = await fetch(downloadUrl);
+        if (!response.ok) throw new Error("CORS");
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = safeName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        const a = document.createElement("a");
+        a.href = downloadUrl;
+        a.download = safeName;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
     }
 
-    function fecharModal() {
-      document.getElementById('modalEvidencia').classList.add('hidden');
-      document.getElementById('modalEvidencia').classList.remove('flex');
-      document.getElementById('modalConteudo').innerHTML = '';
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
-    function exportarPDF() {
-      const registros = window.obterListaRegistros();
-      if (!registros.length) return alert('Sem registos para exportar.');
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+    function escapeAttr(str) {
+      return String(str || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
 
-      let ent = 0, sai = 0;
-      registros.forEach(r => {
-        if (r.tipo === 'entrada') ent += Number(r.valor);
-        else sai += Number(r.valor);
+    // ================= QUESTIONÁRIO DE BEM-ESTAR =================
+    const testSteps = [
+      {
+        step: 1,
+        questions: [
+          {
+            id: "q1",
+            shortTitle: "Inquietação / Preocupação",
+            text: "1. Nas últimas duas semanas, tem sentido uma inquietação ou preocupação constante?",
+            options: [
+              { label: "Nunca ou raramente", score: 0 },
+              { label: "Alguns dias", score: 1 },
+              { label: "Mais da metade dos dias", score: 2 },
+              { label: "Quase todos os dias", score: 3 }
+            ]
+          },
+          {
+            id: "q2",
+            shortTitle: "Dificuldade em relaxar",
+            text: "2. Sente dificuldade em relaxar ou acalmar os pensamentos?",
+            options: [
+              { label: "Consigo relaxar facilmente", score: 0 },
+              { label: "Às vezes tenho dificuldade", score: 1 },
+              { label: "Frequentemente sinto tensão", score: 2 },
+              { label: "Não consigo relaxar", score: 3 }
+            ]
+          }
+        ]
+      },
+      {
+        step: 2,
+        questions: [
+          {
+            id: "q3",
+            shortTitle: "Estado emocional geral",
+            text: "1. Nas últimas duas semanas, como tem se sentido?",
+            options: [
+              { label: "Calmo e equilibrado", score: 0 },
+              { label: "Um pouco ansioso", score: 1 },
+              { label: "Triste ou desanimado", score: 2 },
+              { label: "Muito sobrecarregado", score: 3 }
+            ]
+          },
+          {
+            id: "q4",
+            shortTitle: "Qualidade do sono",
+            text: "2. Consegue dormir bem?",
+            options: [
+              { label: "Sim, com frequência", score: 0 },
+              { label: "Às vezes", score: 1 },
+              { label: "Raramente", score: 2 },
+              { label: "Não", score: 3 }
+            ]
+          }
+        ]
+      },
+      {
+        step: 3,
+        questions: [
+          {
+            id: "q5",
+            shortTitle: "Desempenho nas tarefas diárias",
+            text: "1. Tem conseguido realizar as suas tarefas diárias no trabalho, escola ou em casa?",
+            options: [
+              { label: "Sim, normalmente", score: 0 },
+              { label: "Com algum esforço extra", score: 1 },
+              { label: "Com muita dificuldade", score: 2 },
+              { label: "Não tenho conseguido", score: 3 }
+            ]
+          },
+          {
+            id: "q6",
+            shortTitle: "Necessidade de apoio profissional",
+            text: "2. Sente que precisa de falar com um profissional ou sente-se em sofrimento intenso agora?",
+            options: [
+              { label: "Não, estou apenas a fazer uma avaliação", score: 0 },
+              { label: "Talvez, gostaria de algumas dicas", score: 1 },
+              { label: "Sim, sinto-me muito angustiado(a)", score: 3 },
+              { label: "Preciso de ajuda urgente agora", score: 5 }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let currentStepIndex = 0;
+    let answers = {};
+    let breathInterval = null;
+
+    function getLocalConsultations() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY_CONSULTS)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLocalConsultations(list) {
+      localStorage.setItem(STORAGE_KEY_CONSULTS, JSON.stringify(list));
+    }
+
+    function goToScreen(screenId) {
+      stopBreathing();
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.getElementById(screenId).classList.add("active");
+    }
+
+    function startTest() {
+      currentStepIndex = 0;
+      answers = {};
+      lastConsultationDocId = null;
+      resetVisitorContactForm();
+      renderStep();
+      goToScreen("screen-test");
+    }
+
+    function resetVisitorContactForm() {
+      document.getElementById("visitor-phone").value = "";
+      document.getElementById("visitor-address").value = "";
+      document.getElementById("visitor-neighborhood").value = "";
+      document.getElementById("visitor-email").value = "";
+      const fb = document.getElementById("contact-feedback");
+      fb.className = "contact-feedback";
+      fb.textContent = "";
+      const btn = document.getElementById("save-contact-btn");
+      btn.textContent = "Enviar Dados de Contacto";
+      btn.disabled = false;
+    }
+
+    function renderStep() {
+      const stepData = testSteps[currentStepIndex];
+      const totalSteps = testSteps.length;
+
+      document.getElementById("step-label").textContent = `${stepData.step} de ${totalSteps}`;
+      document.getElementById("progress-fill").style.width = `${(stepData.step / totalSteps) * 100}%`;
+      document.getElementById("next-btn").textContent = stepData.step === totalSteps ? "Ver Resultado" : "Continuar";
+      document.getElementById("validation-error").style.display = "none";
+
+      const container = document.getElementById("questions-container");
+      container.innerHTML = "";
+
+      stepData.questions.forEach(q => {
+        const block = document.createElement("div");
+        block.className = "question-block";
+
+        const title = document.createElement("div");
+        title.className = "question-title";
+        title.textContent = q.text;
+        block.appendChild(title);
+
+        const list = document.createElement("div");
+        list.className = "options-list";
+
+        q.options.forEach((opt, idx) => {
+          const item = document.createElement("div");
+          const isSelected = answers[q.id] && answers[q.id].index === idx;
+          item.className = "option-item" + (isSelected ? " selected" : "");
+          item.onclick = () => selectOption(q.id, idx, opt.score, opt.label);
+
+          item.innerHTML = `
+            <span class="radio-circle"></span>
+            <span>${opt.label}</span>
+          `;
+          list.appendChild(item);
+        });
+
+        block.appendChild(list);
+        container.appendChild(block);
+      });
+    }
+
+    function selectOption(questionId, optionIndex, score, label) {
+      answers[questionId] = { index: optionIndex, score: score, label: label };
+      document.getElementById("validation-error").style.display = "none";
+      renderStep();
+    }
+
+    function prevStep() {
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        renderStep();
+      } else {
+        goToScreen("screen-home");
+      }
+    }
+
+    function nextStep() {
+      const stepData = testSteps[currentStepIndex];
+      const allAnswered = stepData.questions.every(q => answers[q.id] !== undefined);
+
+      if (!allAnswered) {
+        document.getElementById("validation-error").style.display = "block";
+        return;
+      }
+
+      if (currentStepIndex < testSteps.length - 1) {
+        currentStepIndex++;
+        renderStep();
+      } else {
+        evaluateResults();
+      }
+    }
+
+    async function evaluateResults() {
+      let totalScore = 0;
+      Object.values(answers).forEach(ans => {
+        totalScore += ans.score;
       });
 
-      doc.setFontSize(16);
-      doc.text('Relatório Financeiro em Tempo Real', 14, 18);
-      doc.setFontSize(10);
-      doc.text(`Data: ${hoje} | Entradas: ${formatarMoeda(ent)} | Saídas: ${formatarMoeda(sai)} | Saldo: ${formatarMoeda(ent - sai)}`, 14, 26);
+      const urgentFlag = answers["q6"] && answers["q6"].score >= 5;
 
-      const rows = registros.map(r => [
-        r.data,
-        r.tipo.toUpperCase(),
-        r.descricao,
-        r.metodo,
-        `${r.tipo === 'entrada' ? '+' : '-'} ${formatarMoeda(r.valor)}`
-      ]);
+      const card = document.getElementById("result-card");
+      const badge = document.getElementById("result-badge");
+      const title = document.getElementById("result-title");
+      const message = document.getElementById("result-message");
+      const tipsList = document.getElementById("result-tips");
+      const helpBtn = document.getElementById("result-help-btn");
 
-      doc.autoTable({
-        startY: 32,
-        head: [['Data', 'Tipo', 'Descrição', 'Método', 'Valor']],
-        body: rows,
-        headStyles: { fillColor: [30, 41, 59] }
-      });
+      card.className = "result-card";
+      tipsList.innerHTML = "";
 
-      doc.save(`relatorio_${hoje}.pdf`);
+      let riskLevel = "low";
+      let riskLabel = "Bem-Estar Equilibrado";
+
+      if (urgentFlag || totalScore >= 13) {
+        riskLevel = "high";
+        riskLabel = "Atenção Prioritária";
+        card.classList.add("high");
+        badge.textContent = riskLabel;
+        title.textContent = "Não precisa passar por isto sozinho(a)";
+        message.textContent = "As suas respostas indicam um nível elevado de sobrecarga emocional ou sofrimento. Recomendamos falar gratuitamente com uma psicóloga agora mesmo.";
+        helpBtn.textContent = "Falar com Psicóloga Agora (800 123 456)";
+
+        addTips([
+          "Ligue gratuitamente para a Linha de Apoio 800 123 456 (disponível 24 horas).",
+          "Procure estar perto de um familiar ou amigo de confiança neste momento.",
+          "Se sentir risco imediato, ligue 112 ou dirija-se à unidade sanitária mais próxima."
+        ]);
+      } else if (totalScore >= 6) {
+        riskLevel = "moderate";
+        riskLabel = "Sinais Moderados";
+        card.classList.add("moderate");
+        badge.textContent = riskLabel;
+        title.textContent = "O seu corpo e mente pedem uma pausa";
+        message.textContent = "Nota-se algum desgaste emocional, ansiedade ou alteração no sono. Pequenas práticas diárias e apoio preventivo podem fazer grande diferença.";
+        helpBtn.textContent = "Conversar com Psicóloga (Opcional)";
+
+        addTips([
+          "Evite ecrãs e notícias intensas 45 minutos antes de dormir.",
+          "Pratique a técnica de aterramento 5-4-3-2-1: identifique 5 coisas que vê, 4 que pode tocar e 3 sons ao seu redor.",
+          "Partilhe o que está a sentir com alguém de confiança ou ligue para a nossa linha de apoio."
+        ]);
+      } else {
+        badge.textContent = riskLabel;
+        title.textContent = "Mantém um bom equilíbrio emocional";
+        message.textContent = "Os seus indicadores atuais mostram estabilidade no humor e no sono. Continue a cultivar hábitos saudáveis de autocuidado.";
+        helpBtn.textContent = "Conhecer Linha de Apoio 24h";
+
+        addTips([
+          "Mantenha horários regulares para dormir e acordar.",
+          "Reserve pelo menos 15 minutos por dia para caminhar, respirar fundo ou descansar sem pressa.",
+          "Guarde o contacto da linha 800 123 456 caso algum familiar ou amigo precise."
+        ]);
+      }
+
+      goToScreen("screen-result");
+      await registerConsultation(totalScore, riskLevel, riskLabel, urgentFlag);
     }
 
-    function exportarCSV() {
-      const registros = window.obterListaRegistros();
-      if (!registros.length) return alert('Sem registos para exportar.');
-      let csv = 'Data,Tipo,Descricao,Metodo,Valor(MT)\n';
-      registros.forEach(r => {
-        csv += `"${r.data}","${r.tipo}","${r.descricao}","${r.metodo}",${r.valor}\n`;
+    async function registerConsultation(totalScore, riskLevel, riskLabel, urgentFlag) {
+      const now = new Date();
+      const shortCode = "MS-" + Math.floor(1000 + Math.random() * 9000);
+
+      const detailedAnswers = [];
+      testSteps.forEach(step => {
+        step.questions.forEach(q => {
+          detailedAnswers.push({
+            id: q.id,
+            question: q.shortTitle,
+            answer: answers[q.id].label,
+            score: answers[q.id].score
+          });
+        });
       });
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `extrato_${hoje}.csv`;
-      link.click();
+
+      const record = {
+        code: shortCode,
+        timestamp: now.toLocaleString("pt-MZ", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        }),
+        createdAtMs: now.getTime(),
+        totalScore: totalScore,
+        maxScore: 20,
+        riskLevel: riskLevel,
+        riskLabel: riskLabel,
+        urgentFlag: urgentFlag,
+        requestedHelp: false,
+        visitorContact: {
+          phone: "",
+          address: "",
+          neighborhood: "",
+          email: ""
+        },
+        status: "pending",
+        adminNotes: "",
+        responses: detailedAnswers
+      };
+
+      if (firebaseReady && db) {
+        try {
+          const docRef = await db.collection(COLLECTION_CONSULTS).add(record);
+          lastConsultationDocId = docRef.id;
+          return;
+        } catch (error) {
+          console.error("Erro ao gravar no Firestore, usando cópia local:", error);
+        }
+      }
+
+      const localList = getLocalConsultations();
+      record.id = shortCode;
+      localList.unshift(record);
+      saveLocalConsultations(localList);
+      lastConsultationDocId = shortCode;
     }
 
-    atualizarVisaoPermissoes();
+    async function saveVisitorContact() {
+      const phone = document.getElementById("visitor-phone").value.trim();
+      const address = document.getElementById("visitor-address").value.trim();
+      const neighborhood = document.getElementById("visitor-neighborhood").value.trim();
+      const email = document.getElementById("visitor-email").value.trim();
+      const feedback = document.getElementById("contact-feedback");
+      const btn = document.getElementById("save-contact-btn");
+
+      if (!phone && !address && !neighborhood && !email) {
+        feedback.className = "contact-feedback error";
+        feedback.textContent = "Por favor, preencha pelo menos um campo de contacto antes de enviar.";
+        return;
+      }
+
+      const contactData = {
+        phone: phone,
+        address: address,
+        neighborhood: neighborhood,
+        email: email
+      };
+
+      btn.disabled = true;
+      btn.textContent = "A guardar...";
+
+      if (lastConsultationDocId) {
+        if (firebaseReady && db) {
+          try {
+            await db.collection(COLLECTION_CONSULTS).doc(lastConsultationDocId).update({
+              visitorContact: contactData
+            });
+          } catch (err) {
+            console.error("Erro ao atualizar contacto no Firestore:", err);
+            feedback.className = "contact-feedback error";
+            feedback.textContent = "Não foi possível guardar agora. Tente novamente.";
+            btn.disabled = false;
+            btn.textContent = "Enviar Dados de Contacto";
+            return;
+          }
+        } else {
+          const list = getLocalConsultations();
+          const idx = list.findIndex(item => item.id === lastConsultationDocId);
+          if (idx !== -1) {
+            list[idx].visitorContact = contactData;
+            saveLocalConsultations(list);
+          }
+        }
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Atualizar Dados de Contacto";
+      feedback.className = "contact-feedback success";
+      feedback.textContent = "✔ Os seus dados foram registados com sucesso na sua consulta.";
+    }
+
+    async function requestPsychologistHelp() {
+      if (lastConsultationDocId) {
+        if (firebaseReady && db) {
+          try {
+            await db.collection(COLLECTION_CONSULTS).doc(lastConsultationDocId).update({
+              requestedHelp: true
+            });
+          } catch (e) {
+            console.warn(e);
+          }
+        } else {
+          const list = getLocalConsultations();
+          const idx = list.findIndex(item => item.id === lastConsultationDocId);
+          if (idx !== -1) {
+            list[idx].requestedHelp = true;
+            saveLocalConsultations(list);
+          }
+        }
+      }
+      goToScreen("screen-emergency");
+    }
+
+    function addTips(items) {
+      const tipsList = document.getElementById("result-tips");
+      items.forEach(text => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        tipsList.appendChild(li);
+      });
+    }
+
+    // ================= FUNÇÕES DA ADMINISTRADORA =================
+    function openAdminGate() {
+      if (isAdminAuthenticated) {
+        openAdminDashboard();
+      } else {
+        document.getElementById("admin-user-input").value = "";
+        document.getElementById("admin-pass-input").value = "";
+        document.getElementById("login-error").style.display = "none";
+        goToScreen("screen-admin-login");
+        setTimeout(() => document.getElementById("admin-user-input").focus(), 100);
+      }
+    }
+
+    function verifyAdminLogin() {
+      const userVal = document.getElementById("admin-user-input").value.trim().toLowerCase();
+      const passVal = document.getElementById("admin-pass-input").value.trim();
+
+      if (userVal === ADMIN_USERNAME && passVal === ADMIN_PASSWORD) {
+        isAdminAuthenticated = true;
+        document.getElementById("login-error").style.display = "none";
+        openAdminDashboard();
+      } else {
+        document.getElementById("login-error").style.display = "block";
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminAuthenticated = false;
+      if (unsubscribeConsults) {
+        unsubscribeConsults();
+        unsubscribeConsults = null;
+      }
+      goToScreen("screen-home");
+    }
+
+    function switchAdminTab(tab) {
+      const btnConsults = document.getElementById("tab-btn-consults");
+      const btnMedia = document.getElementById("tab-btn-media");
+      const viewMain = document.getElementById("admin-main-view");
+      const viewDetail = document.getElementById("admin-detail-view");
+      const viewMedia = document.getElementById("admin-media-view");
+
+      if (tab === "consults") {
+        btnConsults.classList.add("active");
+        btnMedia.classList.remove("active");
+        viewMedia.style.display = "none";
+        viewDetail.style.display = "none";
+        viewMain.style.display = "flex";
+      } else {
+        btnMedia.classList.add("active");
+        btnConsults.classList.remove("active");
+        viewMain.style.display = "none";
+        viewDetail.style.display = "none";
+        viewMedia.style.display = "flex";
+
+        document.getElementById("admin-about-desc").value = aboutConfig.description || "";
+        document.getElementById("admin-about-phone1").value = aboutConfig.phone1 || "";
+        document.getElementById("admin-about-phone2").value = aboutConfig.phone2 || "";
+        document.getElementById("admin-about-email").value = aboutConfig.email || "";
+
+        document.getElementById("admin-wa-number").value = whatsappConfig.number || "";
+        document.getElementById("admin-wa-message").value = whatsappConfig.message || "";
+        renderAdminVideosList();
+      }
+    }
+
+    function openAdminDashboard() {
+      switchAdminTab("consults");
+      goToScreen("screen-admin");
+
+      const banner = document.getElementById("firebase-status-banner");
+
+      if (firebaseReady && db) {
+        banner.className = "sync-banner";
+        banner.innerHTML = `<span>🟢 Ligado à Nuvem (Tempo Real)</span><span>Sincronizado</span>`;
+
+        if (unsubscribeConsults) unsubscribeConsults();
+        unsubscribeConsults = db.collection(COLLECTION_CONSULTS)
+          .orderBy("createdAtMs", "desc")
+          .onSnapshot((snapshot) => {
+            consultationsCache = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+            renderAdminDashboard();
+          }, (err) => {
+            console.error("Erro na leitura Firestore:", err);
+            banner.className = "sync-banner local";
+            banner.innerHTML = `<span>⚠️ Erro de permissão no Firestore (ver regras)</span>`;
+          });
+      } else {
+        banner.className = "sync-banner local";
+        banner.innerHTML = `<span>⚠️ Modo Local (Verifique regras do Firestore)</span>`;
+        consultationsCache = getLocalConsultations();
+        renderAdminDashboard();
+      }
+    }
+
+    // --- GESTÃO DO "QUEM SOMOS" PELO ADMIN ---
+    async function saveAboutSettings() {
+      const description = document.getElementById("admin-about-desc").value.trim();
+      const phone1 = document.getElementById("admin-about-phone1").value.trim();
+      const phone2 = document.getElementById("admin-about-phone2").value.trim();
+      const email = document.getElementById("admin-about-email").value.trim();
+      const fb = document.getElementById("about-admin-feedback");
+
+      aboutConfig = {
+        description: description,
+        phone1: phone1,
+        phone2: phone2,
+        email: email
+      };
+
+      if (firebaseReady && db) {
+        try {
+          await db.collection(COLLECTION_SETTINGS).doc("quem_somos").set(aboutConfig);
+        } catch (err) {
+          fb.className = "contact-feedback error";
+          fb.textContent = "Erro ao guardar na nuvem: " + err.message;
+          return;
+        }
+      } else {
+        localStorage.setItem(STORAGE_KEY_ABOUT, JSON.stringify(aboutConfig));
+      }
+
+      renderAboutScreen();
+      fb.className = "contact-feedback success";
+      fb.textContent = "✔ Secção 'Quem Somos' atualizada com sucesso.";
+    }
+
+    // --- GESTÃO DO WHATSAPP PELO ADMIN ---
+    async function saveWhatsAppSettings() {
+      const num = document.getElementById("admin-wa-number").value.trim();
+      const msg = document.getElementById("admin-wa-message").value.trim() || "Olá! Vim pelo Mente Segura e gostaria de conversar.";
+      const fb = document.getElementById("wa-admin-feedback");
+
+      whatsappConfig = { number: num, message: msg };
+
+      if (firebaseReady && db) {
+        try {
+          await db.collection(COLLECTION_SETTINGS).doc("whatsapp").set(whatsappConfig);
+        } catch (err) {
+          fb.className = "contact-feedback error";
+          fb.textContent = "Erro ao guardar na nuvem: " + err.message;
+          return;
+        }
+      } else {
+        localStorage.setItem(STORAGE_KEY_WA, JSON.stringify(whatsappConfig));
+      }
+
+      applyWhatsAppUI();
+      fb.className = "contact-feedback success";
+      fb.textContent = num
+        ? "✔ Número de WhatsApp ativado no site para todos os visitantes."
+        : "✔ Número removido. O botão do WhatsApp foi ocultado.";
+    }
+
+    // --- PUBLICAR VÍDEO VIA LINK GRATUITO ---
+    async function publishVideoByLink() {
+      const title = document.getElementById("admin-video-title").value.trim();
+      const url = document.getElementById("admin-video-url").value.trim();
+      const description = document.getElementById("admin-video-desc").value.trim();
+      const fb = document.getElementById("video-admin-feedback");
+      const btn = document.getElementById("publish-video-btn");
+
+      fb.className = "contact-feedback";
+      fb.textContent = "";
+
+      if (!title || !url) {
+        fb.className = "contact-feedback error";
+        fb.textContent = "Por favor, preencha o título e o link do vídeo.";
+        return;
+      }
+
+      const now = new Date();
+      const videoRecord = {
+        title: title,
+        url: url,
+        description: description,
+        date: now.toLocaleDateString("pt-MZ"),
+        createdAtMs: now.getTime()
+      };
+
+      btn.disabled = true;
+      btn.textContent = "A publicar...";
+
+      if (firebaseReady && db) {
+        try {
+          await db.collection(COLLECTION_VIDEOS).add(videoRecord);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = "+ Publicar Vídeo na Página";
+          fb.className = "contact-feedback error";
+          fb.textContent = "Erro ao publicar na nuvem: " + err.message;
+          return;
+        }
+      } else {
+        videoRecord.id = "vid_" + now.getTime();
+        videosCache.unshift(videoRecord);
+        localStorage.setItem(STORAGE_KEY_VIDEOS, JSON.stringify(videosCache));
+        renderVisitorVideos();
+        renderAdminVideosList();
+      }
+
+      document.getElementById("admin-video-title").value = "";
+      document.getElementById("admin-video-url").value = "";
+      document.getElementById("admin-video-desc").value = "";
+
+      btn.disabled = false;
+      btn.textContent = "+ Publicar Vídeo na Página";
+      fb.className = "contact-feedback success";
+      fb.textContent = "✔ Vídeo publicado! Os visitantes já podem assistir e baixar.";
+    }
+
+    async function deleteVideo(videoId) {
+      if (!confirm("Deseja remover este vídeo da página?")) return;
+
+      if (firebaseReady && db) {
+        try {
+          await db.collection(COLLECTION_VIDEOS).doc(videoId).delete();
+        } catch (err) {
+          alert("Erro ao apagar vídeo: " + err.message);
+        }
+      } else {
+        videosCache = videosCache.filter(v => v.id !== videoId);
+        localStorage.setItem(STORAGE_KEY_VIDEOS, JSON.stringify(videosCache));
+        renderVisitorVideos();
+        renderAdminVideosList();
+      }
+    }
+
+    function renderAdminVideosList() {
+      const listEl = document.getElementById("admin-videos-list");
+      const countEl = document.getElementById("admin-videos-count");
+      if (!listEl) return;
+
+      if (countEl) countEl.textContent = videosCache.length;
+
+      if (videosCache.length === 0) {
+        listEl.innerHTML = `<div style="font-size:0.82rem; color:var(--text-muted); text-align:center; padding:12px;">Nenhum vídeo publicado ainda.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = "";
+      videosCache.forEach(v => {
+        const row = document.createElement("div");
+        row.className = "admin-video-item";
+        row.innerHTML = `
+          <div style="overflow:hidden;">
+            <div style="font-size:0.86rem; font-weight:700; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              🎬 ${escapeHtml(v.title)}
+            </div>
+            <div style="font-size:0.74rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              ${escapeHtml(v.url)}
+            </div>
+          </div>
+          <button class="btn-delete-small" onclick="deleteVideo('${escapeAttr(v.id)}')">Apagar</button>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    // --- LISTAGEM E DETALHES DE CONSULTAS ---
+    function setAdminFilter(filter, btnEl) {
+      currentAdminFilter = filter;
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      if (btnEl) btnEl.classList.add("active");
+      renderAdminDashboard();
+    }
+
+    function renderAdminDashboard() {
+      const all = consultationsCache;
+
+      document.getElementById("stat-total").textContent = all.length;
+      document.getElementById("stat-high").textContent = all.filter(c => c.riskLevel === "high").length;
+      document.getElementById("stat-moderate").textContent = all.filter(c => c.riskLevel === "moderate").length;
+      document.getElementById("stat-pending").textContent = all.filter(c => c.status === "pending").length;
+
+      let filtered = all;
+      if (currentAdminFilter === "pending") {
+        filtered = all.filter(c => c.status === "pending");
+      } else if (currentAdminFilter !== "all") {
+        filtered = all.filter(c => c.riskLevel === currentAdminFilter);
+      }
+
+      const listContainer = document.getElementById("admin-consult-list");
+      listContainer.innerHTML = "";
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div class="empty-state">
+            Nenhuma consulta encontrada nesta categoria.<br>
+            <span style="font-size:0.8rem;">As avaliações enviadas pelos visitantes aparecerão aqui automaticamente.</span>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(c => {
+        const card = document.createElement("div");
+        card.className = "consult-card";
+        card.onclick = () => openConsultationDetail(c.id);
+
+        const displayCode = c.code || c.id;
+        const riskClass = c.riskLevel === "high" ? "risk-high" : (c.riskLevel === "moderate" ? "risk-moderate" : "risk-low");
+        const statusHtml = c.status === "reviewed"
+          ? `<span class="status-tag status-done">✔ Analisada</span>`
+          : `<span class="status-tag status-pending">● Pendente</span>`;
+
+        const helpBadge = c.requestedHelp
+          ? `<span style="color:var(--red); font-weight:700; font-size:0.75rem;"> • 📞 Pediu Psicóloga</span>`
+          : "";
+
+        const vc = c.visitorContact || {};
+        const hasContact = vc.phone || vc.neighborhood || vc.address || vc.email;
+        const contactLine = hasContact
+          ? `<div style="font-size:0.78rem; color:var(--teal-dark); margin-top:4px; font-weight:600;">
+               📱 ${escapeHtml(vc.phone) || "Sem tel."} ${vc.neighborhood ? "• 📍 " + escapeHtml(vc.neighborhood) : ""}
+             </div>`
+          : "";
+
+        card.innerHTML = `
+          <div class="consult-top">
+            <span class="consult-id">Visitante #${displayCode}</span>
+            <span class="risk-pill ${riskClass}">${c.riskLabel} (${c.totalScore} pts)</span>
+          </div>
+          <div style="font-size:0.82rem; color:var(--text-dark);">
+            Estado: <strong>${c.responses && c.responses[2] ? c.responses[2].answer : "-"}</strong>${helpBadge}
+          </div>
+          ${contactLine}
+          <div class="consult-meta">
+            <span>🕒 ${c.timestamp}</span>
+            ${statusHtml}
+          </div>
+        `;
+        listContainer.appendChild(card);
+      });
+    }
+
+    function openConsultationDetail(consultId) {
+      const c = consultationsCache.find(item => item.id === consultId);
+      if (!c) return;
+
+      activeDetailId = consultId;
+      document.getElementById("admin-main-view").style.display = "none";
+      document.getElementById("admin-detail-view").style.display = "flex";
+
+      const displayCode = c.code || c.id;
+      const riskClass = c.riskLevel === "high" ? "risk-high" : (c.riskLevel === "moderate" ? "risk-moderate" : "risk-low");
+
+      const vc = c.visitorContact || {};
+      const hasContact = vc.phone || vc.address || vc.neighborhood || vc.email;
+
+      const contactHtml = hasContact
+        ? `
+          <div class="visitor-contact-card">
+            <div style="font-weight:800; color:var(--teal-dark); margin-bottom:4px;">📇 Dados de Contacto do Visitante:</div>
+            <div><strong>Telefone:</strong> ${escapeHtml(vc.phone) || "Não informado"}</div>
+            <div><strong>Morada:</strong> ${escapeHtml(vc.address) || "Não informada"}</div>
+            <div><strong>Bairro:</strong> ${escapeHtml(vc.neighborhood) || "Não informado"}</div>
+            <div><strong>E-mail:</strong> ${escapeHtml(vc.email) || "Não informado"}</div>
+          </div>
+        `
+        : `
+          <div class="visitor-contact-card" style="background:#f8fbfc; border-color:var(--border); color:var(--text-muted);">
+            O visitante optou por não preencher dados de contacto.
+          </div>
+        `;
+
+      let qaHtml = "";
+      (c.responses || []).forEach(r => {
+        qaHtml += `
+          <div class="qa-item">
+            <div class="qa-q">${r.question} (${r.score} pts)</div>
+            <div class="qa-a">${r.answer}</div>
+          </div>
+        `;
+      });
+
+      document.getElementById("detail-content").innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:1.1rem;">Consulta #${displayCode}</h3>
+          <span class="risk-pill ${riskClass}">${c.riskLabel}</span>
+        </div>
+        <div style="font-size:0.82rem; color:var(--text-muted);">
+          Data/Hora: <strong>${c.timestamp}</strong><br>
+          Pontuação Total: <strong>${c.totalScore} / ${c.maxScore || 20}</strong><br>
+          Solicitou Linha de Apoio: <strong>${c.requestedHelp ? "Sim (Clicou em Falar com Psicóloga)" : "Não"}</strong>
+        </div>
+
+        ${contactHtml}
+
+        <hr style="border:none; border-top:1px solid var(--border);">
+        <h4 style="font-size:0.9rem; color:var(--teal-dark);">Respostas do Visitante:</h4>
+        ${qaHtml}
+
+        <hr style="border:none; border-top:1px solid var(--border);">
+        <label style="font-size:0.85rem; font-weight:700; color:var(--text-dark);">Parecer / Notas da Administradora:</label>
+        <textarea id="detail-notes-input" class="admin-notes" placeholder="Escreva aqui a análise ou observação clínica...">${escapeHtml(c.adminNotes || "")}</textarea>
+
+        <button class="btn btn-teal" style="padding:12px;" onclick="saveConsultationReview()">
+          ${c.status === "reviewed" ? "Atualizar Análise" : "Guardar e Marcar como Analisada"}
+        </button>
+      `;
+    }
+
+    async function saveConsultationReview() {
+      if (!activeDetailId) return;
+      const notes = document.getElementById("detail-notes-input").value.trim();
+
+      if (firebaseReady && db) {
+        try {
+          await db.collection(COLLECTION_CONSULTS).doc(activeDetailId).update({
+            adminNotes: notes,
+            status: "reviewed"
+          });
+        } catch (err) {
+          alert("Erro ao guardar análise na nuvem: " + err.message);
+          return;
+        }
+      } else {
+        const list = getLocalConsultations();
+        const idx = list.findIndex(item => item.id === activeDetailId);
+        if (idx !== -1) {
+          list[idx].adminNotes = notes;
+          list[idx].status = "reviewed";
+          saveLocalConsultations(list);
+          consultationsCache = list;
+        }
+      }
+
+      closeConsultationDetail();
+      renderAdminDashboard();
+    }
+
+    function closeConsultationDetail() {
+      activeDetailId = null;
+      document.getElementById("admin-detail-view").style.display = "none";
+      document.getElementById("admin-main-view").style.display = "flex";
+    }
+
+    function exportConsultationsCSV() {
+      if (consultationsCache.length === 0) {
+        alert("Ainda não existem consultas registadas para exportar.");
+        return;
+      }
+
+      const headers = [
+        "Codigo", "Data_Hora", "Telefone", "Morada", "Bairro", "Email",
+        "Nivel_Risco", "Pontuacao", "Pediu_Psicologa",
+        "Estado_Analise", "Q1_Inquietacao", "Q2_Relaxar", "Q3_Humor",
+        "Q4_Sono", "Q5_Tarefas", "Q6_Ajuda_Urgente", "Notas_Admin"
+      ];
+
+      const rows = consultationsCache.map(c => {
+        const vc = c.visitorContact || {};
+        const answersCols = (c.responses || []).map(r => `"${r.answer.replace(/"/g, '""')}"`);
+        return [
+          `"${c.code || c.id}"`,
+          `"${c.timestamp}"`,
+          `"${(vc.phone || "").replace(/"/g, '""')}"`,
+          `"${(vc.address || "").replace(/"/g, '""')}"`,
+          `"${(vc.neighborhood || "").replace(/"/g, '""')}"`,
+          `"${(vc.email || "").replace(/"/g, '""')}"`,
+          `"${c.riskLabel}"`,
+          c.totalScore,
+          `"${c.requestedHelp ? "Sim" : "Nao"}"`,
+          `"${c.status === "reviewed" ? "Analisada" : "Pendente"}"`,
+          ...answersCols,
+          `"${(c.adminNotes || "").replace(/"/g, '""')}"`
+        ].join(";");
+      });
+
+      const csvContent = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "consultas_mente_segura.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAllConsultations() {
+      if (confirm("Deseja apagar os registos guardados localmente neste aparelho?")) {
+        localStorage.removeItem(STORAGE_KEY_CONSULTS);
+        if (!firebaseReady) {
+          consultationsCache = [];
+          renderAdminDashboard();
+        }
+      }
+    }
+
+    // Exercício de Respiração Guiada
+    function toggleBreathing() {
+      if (breathInterval) {
+        stopBreathing();
+        return;
+      }
+
+      const circle = document.getElementById("breath-circle");
+      const inst = document.getElementById("breath-instruction");
+      const btn = document.getElementById("breath-btn");
+      btn.textContent = "Parar Exercício";
+
+      let phase = 0;
+      const runPhase = () => {
+        if (phase === 0) {
+          circle.textContent = "Inspire";
+          inst.textContent = "Puxe o ar devagar pelo nariz (4s)...";
+          circle.classList.add("expand");
+        } else if (phase === 1) {
+          circle.textContent = "Segure";
+          inst.textContent = "Mantenha o ar suavemente (4s)...";
+        } else {
+          circle.textContent = "Expire";
+          inst.textContent = "Solte o ar devagar pela boca (4s)...";
+          circle.classList.remove("expand");
+        }
+        phase = (phase + 1) % 3;
+      };
+
+      runPhase();
+      breathInterval = setInterval(runPhase, 4000);
+    }
+
+    function stopBreathing() {
+      if (breathInterval) {
+        clearInterval(breathInterval);
+        breathInterval = null;
+      }
+      const circle = document.getElementById("breath-circle");
+      const inst = document.getElementById("breath-instruction");
+      const btn = document.getElementById("breath-btn");
+      if (circle) {
+        circle.textContent = "Pronto";
+        circle.classList.remove("expand");
+        inst.textContent = "Clique abaixo para acalmar a mente em 1 minuto";
+        btn.textContent = "Iniciar Exercício";
+      }
+    }
+
+    // Simulação de Chamada
+    function simulateCall(number, serviceName) {
+      document.getElementById("call-number").textContent = number;
+      document.getElementById("call-service").textContent = serviceName;
+      document.getElementById("call-modal").classList.add("active");
+    }
+
+    function endCall() {
+      document.getElementById("call-modal").classList.remove("active");
+    }
   </script>
 </body>
 </html>
