@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestão Financeira em Tempo Real</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Bibliotecas PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+
+  <!-- ================= BARRA DE ESTADO ================= -->
+  <div class="max-w-6xl mx-auto mb-4 flex justify-between items-center bg-slate-800/80 border border-slate-700/80 px-4 py-2.5 rounded-xl shadow-sm">
+    <div class="flex items-center gap-2">
+      <span id="statusConexao" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="text-xs text-slate-300 font-medium">Sincronização em Tempo Real:</span>
+      <span id="rotuloPerfil" class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+        Visitante (Consulta)
+      </span>
+    </div>
+    <div>
+      <button id="btnAbrirLogin" onclick="abrirModalLogin()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow">
+        🔐 Entrar como Admin
+      </button>
+      <button id="btnSairAdmin" onclick="fazerLogout()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-lg transition hidden">
+        🚪 Sair do Modo Admin
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL DE LOGIN (ADMIN) ================= -->
+  <div id="telaLogin" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full space-y-5">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white tracking-tight">Login do Administrador</h2>
+        <button onclick="fecharModalLogin()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <p class="text-slate-400 text-xs">Apenas o administrador autenticado pode alterar valores e lançamentos.</p>
+
+      <form onsubmit="fazerLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Utilizador</label>
+          <input type="text" id="loginUser" placeholder="Digite o utilizador" required
+            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-400 mb-1.5 font-medium uppercase tracking-wider">Palavra-passe</label>
+          <div class="relative">
+            <input type="password" id="loginPass" placeholder="Digite a palavra-passe" required
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition pr-10">
+            <button type="button" onclick="alternarSenha()" class="absolute right-3 top-2.5 text-slate-400 hover:text-white text-sm">👁️</button>
+          </div>
+        </div>
+
+        <p id="erroLogin" class="text-rose-400 text-xs font-medium text-center hidden bg-rose-500/10 border border-rose-500/20 py-2 rounded-lg">
+          Credenciais incorretas!
+        </p>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition shadow">
+          Aceder ao Painel
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= PAINEL PRINCIPAL ================= -->
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- Cabeçalho -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold text-white tracking-tight">Painel de Caixa & Evidências</h1>
+          <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full text-xs font-semibold">
+            Em Tempo Real
+          </span>
+        </div>
+        <p class="text-slate-400 text-sm mt-1">Dados sincronizados instantaneamente em todos os ecrãs conectados</p>
+      </div>
+      <div class="mt-4 md:mt-0 flex flex-wrap gap-2.5">
+        <button onclick="exportarPDF()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1.5">
+          <span>📄</span> Baixar PDF
+        </button>
+        <button onclick="exportarCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-lg text-sm font-medium transition shadow flex items-center gap-1.5">
+          <span>📊</span> Exportar CSV
+        </button>
+        <button id="btnLimparDados" onclick="confirmarLimpeza()" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 px-3.5 py-2 rounded-lg text-sm font-medium transition hidden flex items-center gap-1.5">
+          <span>🗑️</span> Limpar Lançamentos
+        </button>
+      </div>
+    </div>
+
+    <!-- TOTAIS EM TEMPO REAL -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Entradas</span>
+          <span class="text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium">Acumulado (+)</span>
+        </div>
+        <div id="valorEntradaTotal" class="text-3xl font-bold text-emerald-400 mt-3">0,00 MT</div>
+        <p class="text-xs text-slate-500 mt-2">Soma dos recebimentos</p>
+      </div>
+
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Saídas</span>
+          <span class="text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium">Pagamentos (-)</span>
+        </div>
+        <div id="valorSaidaTotal" class="text-3xl font-bold text-rose-400 mt-3">0,00 MT</div>
+        <p class="text-xs text-slate-500 mt-2">Soma das despesas e custos</p>
+      </div>
+
+      <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow flex flex-col justify-between">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Remanescente</span>
+          <span id="badgeStatus" class="text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium">Saldo Atual</span>
+        </div>
+        <div id="valorRemanescente" class="text-3xl font-bold text-blue-400 mt-3">0,00 MT</div>
+        <p class="text-xs text-slate-500 mt-2">Total líquido que restou</p>
+      </div>
+    </div>
+
+    <!-- ÁREA DE LANÇAMENTO E TABELA -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Painel de Lançamento (Admin) -->
+      <div id="painelFormularioAdmin" class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow h-fit hidden">
+        <div class="flex border-b border-slate-700 mb-5">
+          <button id="btnAbaEntrada" onclick="mudarAba('entrada')" 
+            class="flex-1 pb-2 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition">
+            + Adicionar Entrada
+          </button>
+          <button id="btnAbaSaida" onclick="mudarAba('saida')" 
+            class="flex-1 pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+            - Registrar Saída
+          </button>
+        </div>
+
+        <!-- Form Entrada -->
+        <form id="formEntrada" class="space-y-4" onsubmit="salvarLancamento(event, 'entrada')">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 font-medium">Comprovativo <span class="text-slate-500">(PDF, JPG, PNG)</span></label>
+            <input type="file" id="evidenciaEntrada" accept=".pdf,image/jpeg,image/png"
+              class="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-900 rounded-lg p-1.5 border border-slate-700">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 font-medium">Origem / Descrição</label>
+            <input type="text" id="descEntrada" placeholder="Ex: Entrada de Caixa" required
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1 font-medium">Valor (MT)</label>
+              <input type="number" id="valorEntrada" step="0.01" min="0.01" placeholder="0.00" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1 font-medium">Data</label>
+              <input type="date" id="dataEntrada" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 font-medium">Método</label>
+            <select id="metodoEntrada" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-sm text-white focus:outline-none">
+              <option value="M-Pesa">M-Pesa</option>
+              <option value="e-Mola">e-Mola</option>
+              <option value="Transferência Bancária">Transferência</option>
+              <option value="Numerário em Mão">Numerário</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg transition shadow">
+            + Subir Valor nas Entradas
+          </button>
+        </form>
+
+        <!-- Form Saída -->
+        <form id="formSaida" class="space-y-4 hidden" onsubmit="salvarLancamento(event, 'saida')">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 font-medium">Fatura / Recibo <span class="text-slate-500">(PDF, JPG, PNG)</span></label>
+            <input type="file" id="evidenciaSaida" accept=".pdf,image/jpeg,image/png"
+              class="w-full text-xs text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-rose-600 file:text-white hover:file:bg-rose-500 cursor-pointer bg-slate-900 rounded-lg p-1.5 border border-slate-700">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1 font-medium">Descrição da Despesa</label>
+            <input type="text" id="descSaida" placeholder="Ex: Pagamento de Fornecedor" required
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1 font-medium">Valor (MT)</label>
+              <input type="number" id="valorSaida" step="0.01" min="0.01" placeholder="0.00" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1 font-medium">Data</label>
+              <input type="date" id="dataSaida" required
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1 font-medium">Categoria</label>
+              <select id="catSaida" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-sm text-white focus:outline-none">
+                <option value="Peças & Componentes">Peças & Componentes</option>
+                <option value="Equipamentos">Equipamentos</option>
+                <option value="Logística">Logística</option>
+                <option value="Outros">Outros</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1 font-medium">Método</label>
+              <select id="metodoSaida" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-sm text-white focus:outline-none">
+                <option value="M-Pesa">M-Pesa</option>
+                <option value="e-Mola">e-Mola</option>
+                <option value="Transferência Bancária">Transferência</option>
+                <option value="Numerário">Numerário</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-lg transition shadow">
+            - Descontar nas Saídas
+          </button>
+        </form>
+      </div>
+
+      <!-- Tabela de Movimentações -->
+      <div id="colunaTabela" class="lg:col-span-3 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow overflow-hidden flex flex-col">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+          <h2 class="text-lg font-semibold text-white">Extrato de Movimentações</h2>
+          <div class="flex gap-1 bg-slate-900 p-1 rounded-lg border border-slate-700 text-xs">
+            <button onclick="filtrarTabela('todos')" id="filtro-todos" class="px-2.5 py-1 rounded bg-slate-700 text-white font-medium">Todos</button>
+            <button onclick="filtrarTabela('entrada')" id="filtro-entrada" class="px-2.5 py-1 rounded text-slate-400 hover:text-white">Entradas (+)</button>
+            <button onclick="filtrarTabela('saida')" id="filtro-saida" class="px-2.5 py-1 rounded text-slate-400 hover:text-white">Saídas (-)</button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+                <th class="py-3 px-2">Data</th>
+                <th class="py-3 px-2">Tipo</th>
+                <th class="py-3 px-2">Descrição</th>
+                <th class="py-3 px-2">Método</th>
+                <th class="py-3 px-2 text-right">Valor</th>
+                <th class="py-3 px-2 text-center">Evidência</th>
+                <th id="thAcao" class="py-3 px-2 text-center hidden">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaCorpo" class="divide-y divide-slate-700/60 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Evidência -->
+  <div id="modalEvidencia" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50 backdrop-blur-sm" onclick="fecharModal()">
+    <div class="bg-slate-800 p-4 rounded-xl max-w-3xl w-full border border-slate-700 flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center mb-3">
+        <h3 id="modalTitulo" class="font-semibold text-white truncate pr-2">Evidência Anexada</h3>
+        <button onclick="fecharModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+      <div id="modalConteudo" class="flex-1 overflow-auto rounded-lg bg-slate-900 min-h-[300px] flex items-center justify-center p-2"></div>
+    </div>
+  </div>
+
+  <!-- ================= FIREBASE REALTIME SDK (ES MODULES) ================= -->
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-database.js";
+
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyA0Rw-FHQE2aJ7TckdScghtlWdxGnMgfu4",
+  authDomain: "relatorio-a94ea.firebaseapp.com",
+  databaseURL: "https://relatorio-a94ea-default-rtdb.firebaseio.com",
+  projectId: "relatorio-a94ea",
+  storageBucket: "relatorio-a94ea.firebasestorage.app",
+  messagingSenderId: "590619131231",
+  appId: "1:590619131231:web:ffb1aa102d3b166d304aea",
+  measurementId: "G-61DZ3FC1FZ"
+};
+
+    // -------------------------------------------------------------
+    // Cole aqui as chaves do seu projeto Firebase (Console do Firebase)
+    // -------------------------------------------------------------
+   
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const registrosRef = ref(db, 'caixa/lancamentos');
+
+    // Variáveis de Estado
+    let listaRegistros = [];
+    let filtroAtual = 'todos';
+
+    // OUVINTE EM TEMPO REAL: Qualquer aparelho aberto atualiza aqui instantaneamente
+    onValue(registrosRef, (snapshot) => {
+      const data = snapshot.val();
+      listaRegistros = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          listaRegistros.push({ fbKey: key, ...data[key] });
+        });
+      }
+      atualizarPainel();
+    }, (error) => {
+      console.warn("Sem conexão com o Firebase, operando localmente:", error);
+    });
+
+    // Funções globais ligadas ao Firebase
+    window.salvarLancamentoNoFirebase = function(item) {
+      const novoRef = push(registrosRef);
+      set(novoRef, item);
+    };
+
+    window.removerItemDoFirebase = function(fbKey) {
+      const itemRef = ref(db, `caixa/lancamentos/${fbKey}`);
+      remove(itemRef);
+    };
+
+    window.limparTudoNoFirebase = function() {
+      set(registrosRef, null);
+    };
+
+    window.obterListaRegistros = () => listaRegistros;
+    window.definirFiltro = (f) => { filtroAtual = f; atualizarPainel(); };
+    window.obterFiltro = () => filtroAtual;
+  </script>
+
+  <!-- ================= LÓGICA DE INTERFACE E EVENTOS ================= -->
+  <script>
+    const USER_ADMIN = "meliogaby";
+    const PASS_ADMIN = "842203592";
+    const hoje = new Date().toISOString().split('T')[0];
+
+    document.getElementById('dataSaida').value = hoje;
+    document.getElementById('dataEntrada').value = hoje;
+
+    function formatarMoeda(valor) {
+      return Number(valor).toLocaleString('pt-MZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MT';
+    }
+
+    function isAdminLogado() {
+      return sessionStorage.getItem('admin_autenticado') === 'true';
+    }
+
+    function atualizarVisaoPermissoes() {
+      const logado = isAdminLogado();
+      const rotulo = document.getElementById('rotuloPerfil');
+      const btnAbrirLogin = document.getElementById('btnAbrirLogin');
+      const btnSairAdmin = document.getElementById('btnSairAdmin');
+      const painelForm = document.getElementById('painelFormularioAdmin');
+      const btnLimpar = document.getElementById('btnLimparDados');
+      const thAcao = document.getElementById('thAcao');
+      const colunaTabela = document.getElementById('colunaTabela');
+
+      if (logado) {
+        rotulo.textContent = "Administrador Conectado";
+        rotulo.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        btnAbrirLogin.classList.add('hidden');
+        btnSairAdmin.classList.remove('hidden');
+        painelForm.classList.remove('hidden');
+        btnLimpar.classList.remove('hidden');
+        thAcao.classList.remove('hidden');
+        colunaTabela.className = "lg:col-span-2 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow overflow-hidden flex flex-col";
+      } else {
+        rotulo.textContent = "Visitante (Consulta)";
+        rotulo.className = "text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30";
+        btnAbrirLogin.classList.remove('hidden');
+        btnSairAdmin.classList.add('hidden');
+        painelForm.classList.add('hidden');
+        btnLimpar.classList.add('hidden');
+        thAcao.classList.add('hidden');
+        colunaTabela.className = "lg:col-span-3 bg-slate-800 p-6 rounded-xl border border-slate-700 shadow overflow-hidden flex flex-col";
+      }
+      atualizarPainel();
+    }
+
+    function abrirModalLogin() {
+      document.getElementById('telaLogin').classList.remove('hidden');
+      document.getElementById('telaLogin').classList.add('flex');
+    }
+
+    function fecharModalLogin() {
+      document.getElementById('telaLogin').classList.add('hidden');
+      document.getElementById('telaLogin').classList.remove('flex');
+      document.getElementById('erroLogin').classList.add('hidden');
+    }
+
+    function alternarSenha() {
+      const input = document.getElementById('loginPass');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function fazerLogin(event) {
+      event.preventDefault();
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value;
+      if (u === USER_ADMIN && p === PASS_ADMIN) {
+        sessionStorage.setItem('admin_autenticado', 'true');
+        fecharModalLogin();
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPass').value = '';
+        atualizarVisaoPermissoes();
+      } else {
+        document.getElementById('erroLogin').classList.remove('hidden');
+      }
+    }
+
+    function fazerLogout() {
+      sessionStorage.removeItem('admin_autenticado');
+      atualizarVisaoPermissoes();
+    }
+
+    // CÁLCULO E SINCRONIZAÇÃO NA TELA
+    function atualizarPainel() {
+      if (!window.obterListaRegistros) return;
+      const registros = window.obterListaRegistros();
+      let totalEntrada = 0;
+      let totalSaida = 0;
+
+      registros.forEach(item => {
+        const v = parseFloat(item.valor) || 0;
+        if (item.tipo === 'entrada') totalEntrada += v;
+        else if (item.tipo === 'saida') totalSaida += v;
+      });
+
+      const remanescente = totalEntrada - totalSaida;
+
+      document.getElementById('valorEntradaTotal').textContent = formatarMoeda(totalEntrada);
+      document.getElementById('valorSaidaTotal').textContent = formatarMoeda(totalSaida);
+
+      const remElem = document.getElementById('valorRemanescente');
+      const badgeStatus = document.getElementById('badgeStatus');
+      remElem.textContent = formatarMoeda(remanescente);
+
+      if (remanescente < 0) {
+        remElem.className = 'text-3xl font-bold text-rose-500 mt-3';
+        badgeStatus.className = 'text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium';
+        badgeStatus.textContent = 'Déficit (Negativo)';
+      } else {
+        remElem.className = 'text-3xl font-bold text-blue-400 mt-3';
+        badgeStatus.className = 'text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full text-xs font-medium';
+        badgeStatus.textContent = 'Saldo Restante';
+      }
+
+      renderizarTabela(registros);
+    }
+
+    function salvarLancamento(event, tipo) {
+      event.preventDefault();
+      if (!isAdminLogado()) return;
+
+      const fileInput = document.getElementById(tipo === 'saida' ? 'evidenciaSaida' : 'evidenciaEntrada');
+      const file = fileInput.files[0];
+
+      const prosseguir = (arquivoDados = null, nome = 'Sem comprovativo', mime = null) => {
+        const novoItem = {
+          tipo: tipo,
+          data: tipo === 'saida' ? document.getElementById('dataSaida').value : document.getElementById('dataEntrada').value,
+          descricao: tipo === 'saida' ? document.getElementById('descSaida').value : document.getElementById('descEntrada').value,
+          valor: parseFloat(tipo === 'saida' ? document.getElementById('valorSaida').value : document.getElementById('valorEntrada').value),
+          categoria: tipo === 'saida' ? document.getElementById('catSaida').value : 'Entrada/Depósito',
+          metodo: tipo === 'saida' ? document.getElementById('metodoSaida').value : document.getElementById('metodoEntrada').value,
+          nomeArquivo: nome,
+          arquivoBase64: arquivoDados,
+          tipoMime: mime
+        };
+
+        window.salvarLancamentoNoFirebase(novoItem);
+
+        if (tipo === 'saida') {
+          document.getElementById('formSaida').reset();
+          document.getElementById('dataSaida').value = hoje;
+        } else {
+          document.getElementById('formEntrada').reset();
+          document.getElementById('dataEntrada').value = hoje;
+        }
+      };
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => prosseguir(e.target.result, file.name, file.type);
+        reader.readAsDataURL(file);
+      } else {
+        prosseguir();
+      }
+    }
+
+    function removerItem(fbKey) {
+      if (!isAdminLogado()) return;
+      if (confirm('Deseja eliminar este registo? Ele será removido em tempo real de todos os aparelhos.')) {
+        window.removerItemDoFirebase(fbKey);
+      }
+    }
+
+    function confirmarLimpeza() {
+      if (!isAdminLogado()) return;
+      if (confirm('Atenção: isto apagará os dados em todos os aparelhos. Continuar?')) {
+        window.limparTudoNoFirebase();
+      }
+    }
+
+    function mudarAba(aba) {
+      const btnSaida = document.getElementById('btnAbaSaida');
+      const btnEntrada = document.getElementById('btnAbaEntrada');
+      const formSaida = document.getElementById('formSaida');
+      const formEntrada = document.getElementById('formEntrada');
+
+      if (aba === 'saida') {
+        btnSaida.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-rose-500 text-rose-400 transition';
+        btnEntrada.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+        formSaida.classList.remove('hidden');
+        formEntrada.classList.add('hidden');
+      } else {
+        btnEntrada.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 transition';
+        btnSaida.className = 'flex-1 pb-2 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+        formEntrada.classList.remove('hidden');
+        formSaida.classList.add('hidden');
+      }
+    }
+
+    function filtrarTabela(tipo) {
+      window.definirFiltro(tipo);
+      ['todos', 'entrada', 'saida'].forEach(t => {
+        const btn = document.getElementById(`filtro-${t}`);
+        btn.className = (t === tipo) 
+          ? 'px-2.5 py-1 rounded bg-slate-700 text-white font-medium' 
+          : 'px-2.5 py-1 rounded text-slate-400 hover:text-white';
+      });
+    }
+
+    function renderizarTabela(registros) {
+      const corpo = document.getElementById('tabelaCorpo');
+      corpo.innerHTML = '';
+      const admin = isAdminLogado();
+      const filtro = window.obterFiltro ? window.obterFiltro() : 'todos';
+
+      const filtrados = registros.filter(r => filtro === 'todos' || r.tipo === filtro);
+
+      if (filtrados.length === 0) {
+        corpo.innerHTML = `<tr><td colspan="${admin ? '7' : '6'}" class="py-8 text-center text-slate-500 text-sm">Nenhum registo disponível.</td></tr>`;
+        return;
+      }
+
+      filtrados.slice().reverse().forEach(item => {
+        const isEntrada = item.tipo === 'entrada';
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-700/30 transition';
+
+        let botaoEvidencia = '<span class="text-slate-600 text-xs">—</span>';
+        if (item.arquivoBase64) {
+          const isPdf = item.nomeArquivo && (item.nomeArquivo.toLowerCase().endsWith('.pdf') || item.tipoMime === 'application/pdf');
+          botaoEvidencia = `
+            <button onclick="abrirEvidencia('${item.fbKey}')" class="text-blue-400 hover:text-blue-300 text-xs underline font-medium">
+              Ver ${isPdf ? 'PDF' : 'Imagem'}
+            </button>
+          `;
+        }
+
+        let colunaAcao = '';
+        if (admin) {
+          colunaAcao = `
+            <td class="py-3 px-2 text-center">
+              <button onclick="removerItem('${item.fbKey}')" class="text-slate-500 hover:text-rose-400 text-sm transition font-bold" title="Excluir">&times;</button>
+            </td>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="py-3 px-2 text-slate-300 whitespace-nowrap">${item.data}</td>
+          <td class="py-3 px-2">
+            <span class="px-2 py-0.5 rounded text-[11px] font-semibold ${isEntrada ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">
+              ${isEntrada ? 'Entrada (+)' : 'Saída (-)'}
+            </span>
+          </td>
+          <td class="py-3 px-2 font-medium text-white">${item.descricao}</td>
+          <td class="py-3 px-2 text-slate-300 text-xs">${item.metodo}</td>
+          <td class="py-3 px-2 text-right font-semibold whitespace-nowrap ${isEntrada ? 'text-emerald-400' : 'text-rose-400'}">
+            ${isEntrada ? '+' : '-'} ${formatarMoeda(item.valor)}
+          </td>
+          <td class="py-3 px-2 text-center whitespace-nowrap">${botaoEvidencia}</td>
+          ${colunaAcao}
+        `;
+        corpo.appendChild(tr);
+      });
+    }
+
+    function abrirEvidencia(fbKey) {
+      const registros = window.obterListaRegistros();
+      const item = registros.find(r => r.fbKey === fbKey);
+      if (!item || !item.arquivoBase64) return;
+
+      document.getElementById('modalTitulo').textContent = `${item.descricao} (${formatarMoeda(item.valor)})`;
+      const container = document.getElementById('modalConteudo');
+      container.innerHTML = '';
+
+      if (item.tipoMime === 'application/pdf' || item.nomeArquivo.toLowerCase().endsWith('.pdf')) {
+        const iframe = document.createElement('iframe');
+        iframe.src = item.arquivoBase64;
+        iframe.className = 'w-full h-[65vh] rounded border-0';
+        container.appendChild(iframe);
+      } else {
+        const img = document.createElement('img');
+        img.src = item.arquivoBase64;
+        img.className = 'max-w-full max-h-[70vh] object-contain rounded';
+        container.appendChild(img);
+      }
+
+      document.getElementById('modalEvidencia').classList.remove('hidden');
+      document.getElementById('modalEvidencia').classList.add('flex');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalEvidencia').classList.add('hidden');
+      document.getElementById('modalEvidencia').classList.remove('flex');
+      document.getElementById('modalConteudo').innerHTML = '';
+    }
+
+    function exportarPDF() {
+      const registros = window.obterListaRegistros();
+      if (!registros.length) return alert('Sem registos para exportar.');
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let ent = 0, sai = 0;
+      registros.forEach(r => {
+        if (r.tipo === 'entrada') ent += Number(r.valor);
+        else sai += Number(r.valor);
+      });
+
+      doc.setFontSize(16);
+      doc.text('Relatório Financeiro em Tempo Real', 14, 18);
+      doc.setFontSize(10);
+      doc.text(`Data: ${hoje} | Entradas: ${formatarMoeda(ent)} | Saídas: ${formatarMoeda(sai)} | Saldo: ${formatarMoeda(ent - sai)}`, 14, 26);
+
+      const rows = registros.map(r => [
+        r.data,
+        r.tipo.toUpperCase(),
+        r.descricao,
+        r.metodo,
+        `${r.tipo === 'entrada' ? '+' : '-'} ${formatarMoeda(r.valor)}`
+      ]);
+
+      doc.autoTable({
+        startY: 32,
+        head: [['Data', 'Tipo', 'Descrição', 'Método', 'Valor']],
+        body: rows,
+        headStyles: { fillColor: [30, 41, 59] }
+      });
+
+      doc.save(`relatorio_${hoje}.pdf`);
+    }
+
+    function exportarCSV() {
+      const registros = window.obterListaRegistros();
+      if (!registros.length) return alert('Sem registos para exportar.');
+      let csv = 'Data,Tipo,Descricao,Metodo,Valor(MT)\n';
+      registros.forEach(r => {
+        csv += `"${r.data}","${r.tipo}","${r.descricao}","${r.metodo}",${r.valor}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `extrato_${hoje}.csv`;
+      link.click();
+    }
+
+    atualizarVisaoPermissoes();
+  </script>
+</body>
+</html>
