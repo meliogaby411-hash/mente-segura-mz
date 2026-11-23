@@ -1625,7 +1625,7 @@
         <!-- Exportar / Limpar -->
         <div class="admin-actions-row">
           <button class="action-small-btn" onclick="exportConsultationsCSV()">📥 Exportar CSV</button>
-          <button class="action-small-btn" style="color:var(--red);" onclick="clearAllConsultations()">🗑️ Limpar Local</button>
+          <button id="btn-clear-all" class="action-small-btn" style="color:var(--red);" onclick="clearAllConsultations()">🗑️ Limpar Tudo</button>
         </div>
 
         <!-- Lista de Visitantes/Consultas -->
@@ -1788,7 +1788,9 @@
     };
 
     let aboutConfig = {
-      description: "O Mente Segura é uma plataforma dedicada ao apoio psicológico, acolhimento emocional e promoção do bem-estar mental em Moçambique.\n\nOferecemos um espaço confidencial, acessível e seguro para orientação inicial, conteúdos educativos e encaminhamento profissional.",
+      description: "O Mente Segura é uma plataforma dedicada ao apoio psicológico, acolhimento emocional e promoção do bem-estar mental em Moçambique.
+
+Oferecemos um espaço confidencial, acessível e seguro para orientação inicial, conteúdos educativos e encaminhamento profissional.",
       phone1: "800 123 456",
       phone2: "+258 84 000 0000",
       email: "contacto@mentesegura.co.mz"
@@ -2911,6 +2913,10 @@
         <button class="btn btn-teal" style="padding:12px;" onclick="saveConsultationReview()">
           ${c.status === "reviewed" ? "Atualizar Análise" : "Guardar e Marcar como Analisada"}
         </button>
+
+        <button class="btn btn-outline-red" style="padding:11px; margin-top:4px;" onclick="deleteSingleConsultation('${escapeAttr(c.id)}')">
+          🗑️ Apagar Esta Consulta Definitivamente
+        </button>
       `;
     }
 
@@ -2991,12 +2997,77 @@
       URL.revokeObjectURL(url);
     }
 
-    function clearAllConsultations() {
-      if (confirm("Deseja apagar os registos guardados localmente neste aparelho e limpar a visualização atual do painel?")) {
-        localStorage.removeItem(STORAGE_KEY_CONSULTS);
-        consultationsCache = [];
+    async function deleteSingleConsultation(consultId) {
+      if (!confirm("Tem a certeza que deseja apagar esta consulta definitivamente? Esta ação não pode ser desfeita.")) {
+        return;
+      }
+
+      if (firebaseReady && db) {
+        try {
+          await db.collection(COLLECTION_CONSULTS).doc(consultId).delete();
+        } catch (err) {
+          alert("Erro ao apagar consulta na nuvem: " + err.message);
+          return;
+        }
+      }
+
+      const list = getLocalConsultations().filter(item => item.id !== consultId);
+      saveLocalConsultations(list);
+
+      if (!firebaseReady) {
+        consultationsCache = list;
         renderAdminDashboard();
       }
+
+      closeConsultationDetail();
+    }
+
+    async function clearAllConsultations() {
+      if (consultationsCache.length === 0 && getLocalConsultations().length === 0) {
+        alert("Não existem consultas para limpar.");
+        return;
+      }
+
+      if (!confirm("ATENÇÃO: Deseja apagar DEFINITIVAMENTE todas as consultas de pacientes registadas na nuvem e neste aparelho?")) {
+        return;
+      }
+
+      const btn = document.getElementById("btn-clear-all");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "⏳ A apagar...";
+      }
+
+      if (firebaseReady && db) {
+        try {
+          const snapshot = await db.collection(COLLECTION_CONSULTS).get();
+          const docs = snapshot.docs;
+          for (let i = 0; i < docs.length; i += 450) {
+            const batch = db.batch();
+            const chunk = docs.slice(i, i + 450);
+            chunk.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+          }
+        } catch (err) {
+          alert("Erro ao limpar consultas na nuvem (verifique as regras de escrita/eliminação no Firestore): " + err.message);
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "🗑️ Limpar Tudo";
+          }
+          return;
+        }
+      }
+
+      localStorage.removeItem(STORAGE_KEY_CONSULTS);
+      consultationsCache = [];
+      renderAdminDashboard();
+
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "🗑️ Limpar Tudo";
+      }
+
+      alert("Todas as consultas foram apagadas definitivamente.");
     }
 
     // Exercício de Respiração Guiada
