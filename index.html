@@ -1763,7 +1763,7 @@
     // 1. CREDENCIAIS DA ADMINISTRADORA
     // =========================================================================
     const ADMIN_USERNAME = "consulta";
-    const ADMIN_PASSWORD = "846623571";
+    const ADMIN_PASSWORD = "123322";
 
     // =========================================================================
     // 2. CONFIGURAÇÃO DO FIREBASE (CLOUD FIRESTORE GRATUITO) - MENTE SEGURA
@@ -2992,12 +2992,10 @@
     }
 
     function clearAllConsultations() {
-      if (confirm("Deseja apagar os registos guardados localmente neste aparelho?")) {
+      if (confirm("Deseja apagar os registos guardados localmente neste aparelho e limpar a visualização atual do painel?")) {
         localStorage.removeItem(STORAGE_KEY_CONSULTS);
-        if (!firebaseReady) {
-          consultationsCache = [];
-          renderAdminDashboard();
-        }
+        consultationsCache = [];
+        renderAdminDashboard();
       }
     }
 
